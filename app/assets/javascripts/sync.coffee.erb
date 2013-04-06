@@ -1,11 +1,35 @@
 @Sync = 
   
+  ready: false
+  readyQueue: []
   FAYE_HOST: "<%= Sync.config[:server] %>"
+
+  init: ->    
+    $ => 
+      @ready = true
+      @connect()
+      @flushReadyQueue()
+
 
   connect: ->
     window.client = @client = new Faye.Client(@FAYE_HOST)
 
+  
+  onReady: (callback) ->
+    console.log 'onready'
+    if @isReady()
+      callback()
+    else
+      @readyQueue.push callback
 
+
+  flushReadyQueue: -> 
+    console.log "flush"
+    @onReady(callback) for callback in @readyQueue
+    @readyQueue = []
+
+
+  isReady: -> @ready
 
 
 class Sync.Partial
@@ -80,4 +104,4 @@ class Sync.PartialCreator
     partial.subscribe()
 
 
-$ -> Sync.connect()
+Sync.init()

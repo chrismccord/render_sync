@@ -21,8 +21,14 @@ where this approach fits. Current caveats yet to be implemented:
      updates to the client. Ideally, active listeners/channels could be tracked and skip rendering of any 
      partial that lacks listeners.
 
+## Installation
 
-# Brief Example
+    gem 'sync'
+    rails g sync:install
+    rackup sync.ru -E production
+
+
+## Brief Example
 
 View `sync/users/_user_list_row.html.erb`
 
