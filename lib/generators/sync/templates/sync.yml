@@ -1,0 +1,9 @@
+development:
+  server: "http://localhost:9292/faye"
+  auth_token: "secret"
+test:
+  server: "http://localhost:9292/faye"
+  auth_token: "secret"
+production:
+  server: "http://example.com/faye"
+  auth_token: "<%= defined?(SecureRandom) ? SecureRandom.hex(32) : ActiveSupport::SecureRandom.hex(32) %>"

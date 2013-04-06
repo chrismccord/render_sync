@@ -1,0 +1,83 @@
+@Sync = 
+  
+  FAYE_HOST: "<%= Sync.config[:server] %>"
+
+  connect: ->
+    window.client = @client = new Faye.Client(@FAYE_HOST)
+
+
+
+
+class Sync.Partial
+
+  constructor: (@channelUpdate, @channelDestroy, @selectorStart, @selectorEnd) ->
+    @$el = $("[data-sync-id='#{@selectorStart}']").nextUntil("[data-sync-id='#{@selectorEnd}']")
+
+
+  subscribe: ->
+    client.subscribe @channelUpdate, (data) => @update(data.html)
+    client.subscribe @channelDestroy, => @remove()
+
+
+  update: (html) -> @$el.html($(html).html())
+  
+  remove: -> @$el.remove()
+
+  insert: (html, channelUpdate, channelDestroy, selectorStart, selectorEnd) ->
+    concat = ""
+    concat += """
+      <script type='text/javascript' data-sync-id='#{selectorStart}'>
+        $(function(){
+          var partial = new Sync.Partial(
+            '#{channelUpdate}',
+            '#{channelDestroy}',
+            '#{selectorStart}',
+            '#{selectorEnd}'
+          );
+          partial.subscribe();
+        });
+      </script>
+    """
+    concat += html
+    concat += """
+      <script type='text/javascript' data-sync-id='#{selectorEnd}'>
+      </script>
+    """
+    $(concat).insertBefore(@$el)
+
+
+class Sync.PartialCreator
+
+  constructor: (@channel, @selector) ->
+    @$el = $("[data-sync-id='#{@selector}']")
+
+
+  subscribe: ->
+    client.subscribe @channel, (data) => 
+      @insert data.html,
+              data.channelUpdate,
+              data.channelDestroy,
+              data.selectorStart,
+              data.selectorEnd
+
+
+  insert: (html, channelUpdate, channelDestroy, selectorStart, selectorEnd) ->
+    @$el.before """
+      <script type='text/javascript' data-sync-id='#{selectorStart}'>
+      </script>
+    """
+    @$el.before html
+    @$el.before """
+      <script type='text/javascript' data-sync-id='#{selectorEnd}'>
+      </script>
+    """
+    partial = new Sync.Partial(
+      channelUpdate,
+      channelDestroy,
+      selectorStart,
+      selectorEnd
+    )
+    partial.subscribe()
+
+
+$ -> Sync.connect()

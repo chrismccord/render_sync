@@ -1,0 +1,6 @@
+*.swp
+**/*.swp
+*.gem
+Gemfile.lock
+.bundle
+.DS_Store
