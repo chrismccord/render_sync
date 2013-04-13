@@ -9,7 +9,9 @@ update in realtime in the browser when changes occur on the server. In practice,
 is to replace `render partial: ''` with `sync partial: ''` and a simple `sync @model, :update` 
 in the controller to allow realtime updates without any extra javascript or configuration. 
 Initial results are intriguing and I would love to get some real world use-cases and see 
-where this approach fits. Current caveats yet to be implemented:
+where this approach fits.
+
+Current caveats yet to be implemented but on the immediate road-map:
 
    - Backgrounding pub/sub in a worker request. Although not completely necessary 
      if your pubsub server is living on the same host, the problem currently is losing
@@ -20,6 +22,8 @@ where this approach fits. Current caveats yet to be implemented:
    - Performance. Currently a model's `app/views/sync/{model_name}` partials are all renderred when publishing 
      updates to the client. Ideally, active listeners/channels could be tracked and skip rendering of any 
      partial that lacks listeners.
+
+   - No parent scoping for listeners on create/sync_new events. Next priority is being able to set a specific channel to listen on (ie. `current_user/comments/new` so we arent publishing global creates.
 
 ## Installation
 
