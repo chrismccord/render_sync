@@ -12,6 +12,7 @@ module Sync
           <script type='text/javascript' data-sync-id='#{partial.selector_start}'>
             Sync.onReady(function(){
               var partial = new Sync.Partial(
+                '#{partial.name}',
                 '#{partial.channel_for_action(:update)}',
                 '#{partial.channel_for_action(:destroy)}',
                 '#{partial.selector_start}',
@@ -39,6 +40,7 @@ module Sync
         <script type='text/javascript' data-sync-id='#{partial_creator.selector}'>
           Sync.onReady(function(){
             var partial_creator = new Sync.PartialCreator(
+              '#{partial_name}',
               '#{partial_creator.channel}',
               '#{partial_creator.selector}'
             );

@@ -16,7 +16,6 @@
 
   
   onReady: (callback) ->
-    console.log 'onready'
     if @isReady()
       callback()
     else
@@ -24,55 +23,67 @@
 
 
   flushReadyQueue: -> 
-    console.log "flush"
     @onReady(callback) for callback in @readyQueue
     @readyQueue = []
 
 
   isReady: -> @ready
 
+  camelize: (str) ->
+    str.replace /(?:^|[-_])(\w)/g, (match, camel) -> camel?.toUpperCase() ? ''
+
+  
+  viewClassFromPartialName: (name) -> Sync[@camelize(name)] ? Sync.View
+
+
+class Sync.View
+  
+  constructor: (@$el, @name) ->
+
+  beforeUpdate: (html, data) -> @update(html)
+
+  afterUpdate: -> #noop
+  
+  afterInsert: -> @$el.show()
+
+  beforeRemove: -> @remove()
+
+  afterRemove: -> #noop
+
+  remove: -> 
+    @$el.remove()
+    @afterRemove()
+
+
+  bind: -> #noop
+
+  update: (html) -> 
+    @$el.html($(html).html())
+    @afterUpdate()
+    @bind()
+
+
 
 class Sync.Partial
 
-  constructor: (@channelUpdate, @channelDestroy, @selectorStart, @selectorEnd) ->
+  constructor: (@name, @channelUpdate, @channelDestroy, @selectorStart, @selectorEnd) ->
     @$el = $("[data-sync-id='#{@selectorStart}']").nextUntil("[data-sync-id='#{@selectorEnd}']")
+    @view = new (Sync.viewClassFromPartialName(@name))(@$el, @name)
 
 
   subscribe: ->
     client.subscribe @channelUpdate, (data) => @update(data.html)
     client.subscribe @channelDestroy, => @remove()
 
-
-  update: (html) -> @$el.html($(html).html())
   
-  remove: -> @$el.remove()
+  update: (html) -> @view.beforeUpdate(html, {})
 
-  insert: (html, channelUpdate, channelDestroy, selectorStart, selectorEnd) ->
-    concat = ""
-    concat += """
-      <script type='text/javascript' data-sync-id='#{selectorStart}'>
-        $(function(){
-          var partial = new Sync.Partial(
-            '#{channelUpdate}',
-            '#{channelDestroy}',
-            '#{selectorStart}',
-            '#{selectorEnd}'
-          );
-          partial.subscribe();
-        });
-      </script>
-    """
-    concat += html
-    concat += """
-      <script type='text/javascript' data-sync-id='#{selectorEnd}'>
-      </script>
-    """
-    $(concat).insertBefore(@$el)
+  remove: -> @view.beforeRemove()
 
 
 class Sync.PartialCreator
 
-  constructor: (@channel, @selector) ->
+  constructor: (@name, @channel, @selector) ->
     @$el = $("[data-sync-id='#{@selector}']")
 
 
@@ -90,18 +101,19 @@ class Sync.PartialCreator
       <script type='text/javascript' data-sync-id='#{selectorStart}'>
       </script>
     """
-    @$el.before html
+    @$el.before $(html).hide()
     @$el.before """
       <script type='text/javascript' data-sync-id='#{selectorEnd}'>
       </script>
     """
     partial = new Sync.Partial(
+      @name,
       channelUpdate,
       channelDestroy,
       selectorStart,
       selectorEnd
     )
     partial.subscribe()
-
+    partial.view.afterInsert()
 
 Sync.init()
