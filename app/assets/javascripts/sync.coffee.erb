@@ -38,24 +38,34 @@
 
 class Sync.View
   
+  removed: false
+
   constructor: (@$el, @name) ->
 
   beforeUpdate: (html, data) -> @update(html)
 
   afterUpdate: -> #noop
   
-  afterInsert: -> @$el.show()
+  beforeInsert: ($el, data) -> @insert($el)
+
+  afterInsert: -> #noop
 
   beforeRemove: -> @remove()
 
   afterRemove: -> #noop
 
-  remove: -> 
+  isRemoved: -> @removed
+
+  remove: ->
     @$el.remove()
+    @$el = $()
+    @removed = true
     @afterRemove()
 
 
   bind: -> #noop
+
+  show: -> @$el.show()
 
   update: (html) -> 
     @$el.html($(html).html())
@@ -63,12 +73,21 @@ class Sync.View
     @bind()
 
 
+  insert: ($el) -> 
+    @$el.replaceWith($el)
+    @$el = $el
+    @afterInsert()
+    @bind()
+
+
 
 class Sync.Partial
 
   constructor: (@name, @channelUpdate, @channelDestroy, @selectorStart, @selectorEnd) ->
-    @$el = $("[data-sync-id='#{@selectorStart}']").nextUntil("[data-sync-id='#{@selectorEnd}']")
-    @view = new (Sync.viewClassFromPartialName(@name))(@$el, @name)
+    @$start = $("[data-sync-id='#{@selectorStart}']")
+    @$end   = $("[data-sync-id='#{@selectorEnd}']")
+    @$el    = @$start.nextUntil(@$end)
+    @view   = new (Sync.viewClassFromPartialName(@name))(@$el, @name)
 
 
   subscribe: ->
@@ -78,7 +97,20 @@ class Sync.Partial
   
   update: (html) -> @view.beforeUpdate(html, {})
 
-  remove: -> @view.beforeRemove()
+  remove: -> 
+    @view.beforeRemove()
+    @destroy() if @view.isRemoved()
+
+
+  insert: (html) -> @view.beforeInsert($(html), {})
+
+  destroy: ->
+    @$start.remove()
+    @$end.remove()
+    @$el?.remove()
+    delete @$start
+    delete @$end
+    delete @$el
 
 
 class Sync.PartialCreator
@@ -98,13 +130,9 @@ class Sync.PartialCreator
 
   insert: (html, channelUpdate, channelDestroy, selectorStart, selectorEnd) ->
     @$el.before """
-      <script type='text/javascript' data-sync-id='#{selectorStart}'>
-      </script>
-    """
-    @$el.before $(html).hide()
-    @$el.before """
-      <script type='text/javascript' data-sync-id='#{selectorEnd}'>
-      </script>
+      <script type='text/javascript' data-sync-id='#{selectorStart}'></script>
+      <script type='text/javascript' data-sync-el-placeholder></script>
+      <script type='text/javascript' data-sync-id='#{selectorEnd}'></script>
     """
     partial = new Sync.Partial(
       @name,
@@ -114,6 +142,7 @@ class Sync.PartialCreator
       selectorEnd
     )
     partial.subscribe()
-    partial.view.afterInsert()
+    partial.insert(html)
+
 
 Sync.init()
