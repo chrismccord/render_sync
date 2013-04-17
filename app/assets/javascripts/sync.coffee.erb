@@ -2,7 +2,7 @@
   
   ready: false
   readyQueue: []
-  FAYE_HOST: "<%= Sync.config[:server] %>"
+  FAYE_HOST: "<%= Sync.config[:server].to_s %>"
 
   init: ->    
     $ => 
@@ -11,8 +11,13 @@
       @flushReadyQueue()
 
 
+  onConnectFailure: (error) -> #noop
+
   connect: ->
-    window.client = @client = new Faye.Client(@FAYE_HOST)
+    try
+      window.client = @client = new Faye.Client(@FAYE_HOST)
+    catch error
+      @onConnectFailure(error)
 
   
   onReady: (callback) ->
@@ -68,7 +73,9 @@ class Sync.View
   show: -> @$el.show()
 
   update: (html) -> 
-    @$el.html($(html).html())
+    $new = $(html)
+    @$el.replaceWith($new)
+    @$el = $new
     @afterUpdate()
     @bind()
 
