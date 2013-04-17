@@ -35,7 +35,7 @@ module Sync
     private
 
     def resource_name
-      resource.class.model_name.downcase
+      resource.class.model_name.to_s.downcase
     end
 
     def plural_resource_name

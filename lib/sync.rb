@@ -38,6 +38,10 @@ module Sync
         extensions: [FayeExtension.new]
       }.merge(options))
     end
+
+    def pubsub_js_url
+      "#{Sync.config[:server]}/faye.js"
+    end
   end
 end
 
