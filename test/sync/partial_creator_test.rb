@@ -29,7 +29,7 @@ describe Sync::PartialCreator do
 
   describe '#message' do
     it 'returns a Message instance for the partial for the update action' do
-      assert_equal Sync::Message, @partial_creator.message.class
+      assert_equal Sync.client.class::Message, @partial_creator.message.class
     end
   end
 end

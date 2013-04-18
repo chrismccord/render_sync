@@ -44,11 +44,11 @@ describe Sync::Partial do
 
   describe '#message' do
     it 'returns a Message instance for the partial for the update action' do
-      assert_equal Sync::Message, @partial.message(:update).class
+      assert_equal Sync.client.class::Message, @partial.message(:update).class
     end
 
      it 'returns a Message instance for the partial for the destroy action' do
-      assert_equal Sync::Message, @partial.message(:destroy).class
+      assert_equal Sync.client.class::Message, @partial.message(:destroy).class
     end
   end
 

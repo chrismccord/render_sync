@@ -29,7 +29,6 @@ module Sync
       raise ArgumentError, "The #{environment} environment does not exist in #{filename}" if yaml.nil?
       yaml.each{|key, value| config[key.to_sym] = value }
       @client = Sync::Clients.const_get(config[:adapter]).new
-      Sync.const_set("Message", @client.class::Message) unless defined? Message
       @client.setup
     end
 
