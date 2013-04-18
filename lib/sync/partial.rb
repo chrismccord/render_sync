@@ -36,7 +36,7 @@ module Sync
     end
 
     def message(action)
-      Message.new(channel_for_action(action), html: render_to_string)
+      Sync.client.build_message channel_for_action(action), html: render_to_string
     end
 
     def channel_id

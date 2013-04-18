@@ -3,9 +3,18 @@ module Sync
     class Pusher
 
       def setup
+        require 'pusher'
         ::Pusher.app_id = Sync.config[:app_id]
         ::Pusher.key    = Sync.config[:api_key]
         ::Pusher.secret = Sync.config[:auth_token]
+      end
+
+      def batch_publish(*args)
+        Message.batch_publish(*args)
+      end
+
+      def build_message(*args)
+        Message.new(*args)
       end
 
       class Message

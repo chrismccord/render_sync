@@ -22,7 +22,7 @@ module Sync
     end
 
     def message
-      Message.new(channel,
+      Sync.client.build_message(channel,
         html: partial.render_to_string,
         channelUpdate: partial.channel_for_action(:update),
         channelDestroy: partial.channel_for_action(:destroy),

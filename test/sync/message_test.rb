@@ -1,6 +1,6 @@
 require_relative '../test_helper'
 
-describe "Sync::Message" do
+describe "Message" do
   include TestHelper
 
   class NetHttpStub
@@ -10,16 +10,16 @@ describe "Sync::Message" do
   end
 
   before do
-    @message = Sync::Message.new("/my-channel", html: "<p>Some Data</p>")
+    @message = Sync.client.build_message("/my-channel", html: "<p>Some Data</p>")
   end
 
   describe "batched message publishing" do
     before do
-      @messages = 10.times.collect{|i| Sync::Message.new("/ch#{i}", {html: ""})}
+      @messages = 10.times.collect{|i| Sync.client.build_message("/ch#{i}", {html: ""})}
     end
 
     it 'should publish array of messages with single post to faye' do
-      assert Sync::Message.batch_publish(@messages, NetHttpStub)
+      assert Sync.client.batch_publish(@messages, NetHttpStub)
     end
   end
 

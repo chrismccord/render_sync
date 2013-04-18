@@ -17,7 +17,7 @@ module Sync
         end
       end
 
-      Sync::Message.batch_publish(messages.flatten)
+      Sync.client.batch_publish(messages.flatten)
     end
 
     def sync_new(resource)
@@ -28,7 +28,7 @@ module Sync
         end
       end
 
-      Sync::Message::batch_publish(messages.flatten)
+      Sync.client.batch_publish(messages.flatten)
     end
   end
 end

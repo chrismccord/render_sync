@@ -6,6 +6,14 @@ module Sync
         # nothing to set up
       end
 
+      def batch_publish(*args)
+        Message.batch_publish(*args)
+      end
+
+      def build_message(*args)
+        Message.new(*args)
+      end
+
       class Message
 
         attr_accessor :channel, :data
