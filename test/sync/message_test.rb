@@ -1,6 +1,6 @@
 require_relative '../test_helper'
 
-describe Sync::Message do
+describe "Sync::Message" do
   include TestHelper
 
   class NetHttpStub

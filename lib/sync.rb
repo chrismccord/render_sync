@@ -7,14 +7,15 @@ require 'sync/faye_extension'
 require 'sync/partial_creator'
 require 'sync/partial'
 require 'sync/channel'
-require 'sync/message'
+require 'sync/clients/faye'
+require 'sync/clients/pusher'
 require 'sync/engine' if defined? Rails
 require 'faye'
 
 module Sync
 
   class << self
-    attr_reader :config
+    attr_reader :config, :client
 
     # Resets the configuration to the default (empty hash)
     def reset_config
@@ -27,6 +28,9 @@ module Sync
       yaml = YAML.load_file(filename)[environment.to_s]
       raise ArgumentError, "The #{environment} environment does not exist in #{filename}" if yaml.nil?
       yaml.each{|key, value| config[key.to_sym] = value }
+      @client = Sync::Clients.const_get(config[:adapter]).new
+      Sync.const_set("Message", @client.class::Message) unless defined? Message
+      @client.setup
     end
 
     # Returns the Faye Rack application.
@@ -37,10 +41,6 @@ module Sync
         timeout: config[:timeout] || 45,
         extensions: [FayeExtension.new]
       }.merge(options))
-    end
-
-    def pubsub_js_url
-      "#{Sync.config[:server]}/faye.js"
     end
   end
 end

@@ -3,8 +3,11 @@
   ready: false
   readyQueue: []
   FAYE_HOST: "<%= Sync.config[:server].to_s %>"
+  PUSHER_API_KEY: "<%= Sync.config[:api_key].to_s %>"
+  CLIENT_ADAPTER: "<%= Sync.config[:adapter].to_s %>"
 
-  init: ->    
+  init: ->
+    @client = new Sync[@CLIENT_ADAPTER]
     $ => 
       @ready = true
       @connect()
@@ -14,12 +17,10 @@
   onConnectFailure: (error) -> #noop
 
   connect: ->
-    try
-      window.client = @client = new Faye.Client(@FAYE_HOST)
-    catch error
-      @onConnectFailure(error)
+    window.client = @client
+    @client.connect()
 
-  
+
   onReady: (callback) ->
     if @isReady()
       callback()
@@ -39,6 +40,29 @@
 
   
   viewClassFromPartialName: (name) -> Sync[@camelize(name)] ? Sync.View
+
+
+class Sync.Faye
+
+  connect: ->
+    @client = new window.Faye.Client(Sync.FAYE_HOST)
+
+
+  subscribe: (channel, callback) -> 
+    @client.subscribe channel, callback
+
+
+class Sync.Pusher
+
+  SYNC_CHANNEL: "sync"
+
+  connect: ->
+    @pusher = new window.Pusher(Sync.PUSHER_API_KEY)
+    @channel = @pusher.subscribe(@SYNC_CHANNEL)
+
+
+  subscribe: (channel, callback) -> 
+    @channel.bind channel, callback
 
 
 class Sync.View
