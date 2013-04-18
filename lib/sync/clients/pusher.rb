@@ -32,12 +32,8 @@ module Sync
           self.data = data
         end
 
-        def async?
-          Sync.config[:async]
-        end
-
         def publish
-          if async?
+          if Sync.async?
             publish_asynchronous
           else
             publish_synchronous

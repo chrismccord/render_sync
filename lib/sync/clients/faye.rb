@@ -14,12 +14,21 @@ module Sync
         Message.new(*args)
       end
 
+
       class Message
 
         attr_accessor :channel, :data
 
-        def self.batch_publish(messages, net_http = Net::HTTP)
-          net_http.post_form(
+        def self.batch_publish(messages)
+          if Sync.async?
+            batch_publish_asynchronous(messages)
+          else
+            batch_publish_synchronous(messages)
+          end
+        end
+
+        def self.batch_publish_synchronous(messages)
+          Net::HTTP.post_form(
             URI.parse(Sync.config[:server]), 
             message: {
               channel: "/batch_publish",
@@ -28,6 +37,17 @@ module Sync
             }.to_json
           )
         end
+
+        def self.batch_publish_asynchronous(messages)
+          EM::HttpRequest.new(Sync.config[:server]).post(query: {
+            message: {
+              channel: "/batch_publish",
+              data: messages.collect(&:to_hash),
+              ext: { auth_token: Sync.config[:auth_token] }
+            }.to_json
+          })
+        end
+
 
         def initialize(channel, data)
           self.channel = channel
@@ -48,8 +68,22 @@ module Sync
           to_hash.to_json
         end
 
-        def publish(net_http = Net::HTTP)
-          net_http.post_form URI.parse(Sync.config[:server]), message: self.to_json
+        def publish
+          if Sync.async?
+            publish_asynchronous
+          else
+            publish_synchronous
+          end
+        end
+
+        def publish_synchronous
+          Net::HTTP.post_form URI.parse(Sync.config[:server]), message: to_json
+        end
+
+        def publish_asynchronous
+          EM::HttpRequest.new(Sync.config[:server]).post(query: {
+            message: self.to_json
+          })
         end
       end
     end

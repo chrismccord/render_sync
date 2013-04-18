@@ -33,7 +33,6 @@ module Sync
     end
 
     def handle_eror(message, callback)
-      puts "INVALID"
       message['error'] = 'Invalid authentication token'
       callback.call(message)
     end

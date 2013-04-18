@@ -33,6 +33,10 @@ module Sync
       @client.setup
     end
 
+    def async?
+      config[:async]
+    end
+
     # Returns the Faye Rack application.
     # Any options given are passed to the Faye::RackAdapter.
     def pubsub_app(options = {})
