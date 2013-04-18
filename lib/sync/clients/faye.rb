@@ -30,24 +30,23 @@ module Sync
         def self.batch_publish_synchronous(messages)
           Net::HTTP.post_form(
             URI.parse(Sync.config[:server]), 
-            message: {
-              channel: "/batch_publish",
-              data: messages.collect(&:to_hash),
-              ext: { auth_token: Sync.config[:auth_token] }
-            }.to_json
+            message: batch_messages_query_hash(messages).to_json
           )
         end
 
         def self.batch_publish_asynchronous(messages)
           EM::HttpRequest.new(Sync.config[:server]).post(query: {
-            message: {
-              channel: "/batch_publish",
-              data: messages.collect(&:to_hash),
-              ext: { auth_token: Sync.config[:auth_token] }
-            }.to_json
+            message: batch_messages_query_hash(messages).to_json
           })
         end
 
+        def self.batch_messages_query_hash(messages)
+          {
+            channel: "/batch_publish",
+            data: messages.collect(&:to_hash),
+            ext: { auth_token: Sync.config[:auth_token] }
+          }
+        end
 
         def initialize(channel, data)
           self.channel = channel
