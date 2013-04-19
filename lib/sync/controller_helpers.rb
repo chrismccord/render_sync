@@ -4,6 +4,14 @@ module Sync
 
     private
 
+    def sync_update(resource, options = {})
+      sync resource, :update, options
+    end
+
+    def sync_destroy(resource, options = {})
+      sync resource, :destroy, options
+    end
+
     def sync(resource, action, options = {})
       channel = options[:channel]
       resources = [resource].flatten
