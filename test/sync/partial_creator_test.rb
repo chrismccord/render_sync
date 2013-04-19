@@ -5,7 +5,7 @@ describe Sync::PartialCreator do
 
   before do
     @context = ActionController::Base.new
-    @partial_creator = Sync::PartialCreator.new("show", User.new, @context)
+    @partial_creator = Sync::PartialCreator.new("show", User.new, scope = nil, @context)
   end
 
   describe '#channel' do
