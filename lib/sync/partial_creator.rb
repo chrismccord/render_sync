@@ -1,12 +1,13 @@
 module Sync
   class PartialCreator
-    attr_accessor :name, :resource, :context, :partial
+    attr_accessor :name, :resource, :scoped_resource, :context, :partial
 
-    def initialize(name, resource, context)
+    def initialize(name, resource, scoped_resource, context)
       self.name = name
-      self.resource = resource
+      self.resource = Resource.new(resource)
+      self.scoped_resource = Resource.new(scoped_resource) if scoped_resource
       self.context = context
-      self.partial = Partial.new(name, resource, nil, context)
+      self.partial = Partial.new(name, self.resource.model, nil, context)
     end
 
     def channel
@@ -34,16 +35,12 @@ module Sync
 
     private
 
-    def resource_name
-      resource.class.model_name.to_s.downcase
-    end
-
-    def plural_resource_name
-      resource_name.pluralize
-    end
-
     def polymorphic_path
-      "/#{plural_resource_name}/new"
+      if scoped_resource
+        "#{scoped_resource.polymorphic_path}#{resource.polymorphic_new_path}"
+      else
+        "#{resource.polymorphic_new_path}"
+      end
     end
   end
 end

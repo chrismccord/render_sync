@@ -34,17 +34,18 @@ module Sync
 
     def sync_new(options = {})
       partial_name = options.fetch(:partial)
-      resource = options.fetch(:resource)
-      partial_creator = Sync::PartialCreator.new(partial_name, resource, self)
+      resource     = options.fetch(:resource)
+      scope        = options[:scope]
+      creator = Sync::PartialCreator.new(partial_name, resource, scope, self)
       concat "
-        <script type='text/javascript' data-sync-id='#{partial_creator.selector}'>
+        <script type='text/javascript' data-sync-id='#{creator.selector}'>
           Sync.onReady(function(){
-            var partial_creator = new Sync.PartialCreator(
+            var creator = new Sync.PartialCreator(
               '#{partial_name}',
-              '#{partial_creator.channel}',
-              '#{partial_creator.selector}'
+              '#{creator.channel}',
+              '#{creator.selector}'
             );
-            partial_creator.subscribe();
+            creator.subscribe();
           });
         </script>
       ".html_safe

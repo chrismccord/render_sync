@@ -20,11 +20,12 @@ module Sync
       Sync.client.batch_publish(messages.flatten)
     end
 
-    def sync_new(resource)
+    def sync_new(resource, options = {})
+      scope = options[:scope]
       resources = [resource].flatten
       messages = resources.collect do |resource|
         Sync::Partial.all(resource, self).collect do |partial|
-          Sync::PartialCreator.new(partial.name, resource, self).message
+          Sync::PartialCreator.new(partial.name, resource, scope, self).message
         end
       end
 

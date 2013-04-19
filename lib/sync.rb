@@ -7,6 +7,7 @@ require 'sync/faye_extension'
 require 'sync/partial_creator'
 require 'sync/partial'
 require 'sync/channel'
+require 'sync/resource'
 require 'sync/clients/faye'
 require 'sync/clients/pusher'
 require 'sync/engine' if defined? Rails
