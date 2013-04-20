@@ -32,7 +32,19 @@ In additoinal to real-time udpates, Sync also provides:
 
 #### 1) Add the gem to your `Gemfile`
 
+#### Using Faye
+
+    gem 'faye'
+    gem 'thin'
     gem 'sync'
+
+#### Using Pusher
+
+    gem 'pusher'
+    gem 'sync'
+
+#### Install
+
     $ bundle
     $ rails g sync:install
     
