@@ -25,18 +25,27 @@ In additoinal to real-time udpates, Sync also provides:
 
 ## Installation
 
+#### 1) Add the gem to your `Gemfile`
+
     gem 'sync'
-    rails g sync:install
+    $ bundle
+    $ rails g sync:install
     
-### Using [Faye](http://faye.jcoglan.com/)
+#### 2) Require sync in your asset javascript manifest `app/assets/javascripts/application.js`:
+    
+    //= require sync
+
+#### 3) Configure your pubsub server (Faye or Pusher)
+
+#### Using [Faye](http://faye.jcoglan.com/) (self hosted)
 
 Set your configuration in the generated config/sync.yml file, using the Faye adapter. Then run Faye alongside your app.
     
     rackup sync.ru -E production
     
-### Using [Pusher](http://pusher.com)
+#### Using [Pusher](http://pusher.com) (SaaS)
 
-Set your configuration in the generated config/sync.yml file, using the Pusher adapter. No extra process/setup.
+Set your configuration in the generated `config/sync.yml` file, using the Pusher adapter. No extra process/setup.
   
 
 ## Brief Example
