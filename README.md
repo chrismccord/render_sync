@@ -22,6 +22,11 @@ In additoinal to real-time udpates, Sync also provides:
   - JavaScript/CoffeeScript hooks to override and extend element updates/appends/removes for partials
   - Support for [Faye](http://faye.jcoglan.com/) and [Pusher](http://pusher.com)
 
+## Requirements
+
+  - Ruby >= 1.9.2
+  - Rails >= 3.1
+
 
 ## Installation
 
