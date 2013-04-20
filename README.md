@@ -35,7 +35,10 @@ In additoinal to real-time udpates, Sync also provides:
     
     //= require sync
 
+
+
 #### 3) Configure your pubsub server (Faye or Pusher)
+
 
 #### Using [Faye](http://faye.jcoglan.com/) (self hosted)
 
@@ -43,10 +46,36 @@ Set your configuration in the generated `config/sync.yml` file, using the Faye a
     
     rackup sync.ru -E production
     
+
 #### Using [Pusher](http://pusher.com) (SaaS)
 
 Set your configuration in the generated `config/sync.yml` file, using the Pusher adapter. No extra process/setup.
   
+
+##### Determine if your configuration can run in async mode or not (true by default in sync.yml)
+
+By Default, Sync runs in async mode, meaning all http post requests to the pubsub server will run in an 
+eventmachine-http request, bypassing the need for a background job/worker and allowing the controller 
+request-response times to remain unaffected by sync publishes. Running in async mode requires either an evented 
+webserver like `thin` or manually running an eventmachine process in a seperate thread. For example, async mode 
+works perfectly with `unicorn` using a configuration such as:
+
+    # config/unicorn.rb
+    worker_processes 3    
+    preload_app true
+    timeout 30
+
+    before_fork do |server, worker|
+      ActiveRecord::Base.connection.disconnect! if defined?(ActiveRecord::Base)
+      EM.stop if defined?(EM) && EM.reactor_running?
+    end
+    
+    after_fork do |server, worker|
+      ActiveRecord::Base.establish_connection if defined?(ActiveRecord::Base)
+      Thread.new { EM.run }
+    end
+
+
 
 ## Brief Example
 
