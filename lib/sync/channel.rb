@@ -11,7 +11,7 @@ module Sync
     def signature
       OpenSSL::HMAC.hexdigest(
         OpenSSL::Digest::Digest.new('sha1'),
-        Sync.config[:auth_token],
+        Sync.auth_token,
         self.name
       )
     end

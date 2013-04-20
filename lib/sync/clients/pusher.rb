@@ -4,9 +4,9 @@ module Sync
 
       def setup
         require 'pusher'
-        ::Pusher.app_id = Sync.config[:app_id]
-        ::Pusher.key    = Sync.config[:api_key]
-        ::Pusher.secret = Sync.config[:auth_token]
+        ::Pusher.app_id = Sync.app_id
+        ::Pusher.key    = Sync.api_key
+        ::Pusher.secret = Sync.auth_token
       end
 
       def batch_publish(*args)

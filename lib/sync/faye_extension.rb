@@ -39,7 +39,7 @@ module Sync
 
     def message_authenticated?(message)
       !(message['channel'] !~ %r{^/meta/} && 
-        message['ext']['auth_token'] != Sync.config[:auth_token])
+        message['ext']['auth_token'] != Sync.auth_token)
     end
   end
 end

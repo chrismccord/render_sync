@@ -2,9 +2,9 @@
   
   ready: false
   readyQueue: []
-  FAYE_HOST: "<%= Sync.config[:server].to_s %>"
-  PUSHER_API_KEY: "<%= Sync.config[:api_key].to_s %>"
-  CLIENT_ADAPTER: "<%= Sync.config[:adapter].to_s %>"
+  FAYE_HOST: "<%= Sync.server %>"
+  PUSHER_API_KEY: "<%= Sync.api_key %>"
+  CLIENT_ADAPTER: "<%= Sync.adapter %>"
 
   init: ->
     @client = new Sync[@CLIENT_ADAPTER]

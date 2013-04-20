@@ -29,12 +29,40 @@ module Sync
       yaml = YAML.load_file(filename)[environment.to_s]
       raise ArgumentError, "The #{environment} environment does not exist in #{filename}" if yaml.nil?
       yaml.each{|key, value| config[key.to_sym] = value }
-      @client = Sync::Clients.const_get(config[:adapter]).new
+      setup_client
+    end
+
+    def setup_client
+      @client = Sync::Clients.const_get(adapter).new
       @client.setup
     end
 
     def async?
       config[:async]
+    end
+
+    def server
+      config[:server]
+    end
+
+    def javascript_url
+      config[:javascript_url]
+    end
+
+    def auth_token
+      config[:auth_token]
+    end
+
+    def adapter
+      config[:adapter]
+    end
+
+    def app_id
+      config[:app_id]
+    end
+
+    def api_key
+      config[:api_key]
     end
 
     # Returns the Faye Rack application.
