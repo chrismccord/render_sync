@@ -77,7 +77,7 @@ works perfectly with `unicorn` using a configuration such as:
 
 
 
-## Brief Example
+## Brief Example or [checkout an example application](https://github.com/chrismccord/sync_example)
 
 View `sync/users/_user_list_row.html.erb`
 
