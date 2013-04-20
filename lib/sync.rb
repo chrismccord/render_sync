@@ -45,8 +45,8 @@ module Sync
       config[:server]
     end
 
-    def javascript_url
-      config[:javascript_url]
+    def adapater_javascript_url
+      config[:adapater_javascript_url]
     end
 
     def auth_token

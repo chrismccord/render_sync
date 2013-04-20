@@ -1,6 +1,6 @@
 # Pusher
 test:
-  javascript_url: "http://js.pusher.com/2.0/pusher.min.js" 
+  adapater_javascript_url: "http://js.pusher.com/2.0/pusher.min.js" 
   app_id: "YOUR_PUSHER_APP_ID"
   api_key: "YOUR_PUSHER_API_KEY"
   auth_token: "YOUR_PUSHER_SECRET"
