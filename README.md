@@ -39,7 +39,7 @@ In additoinal to real-time udpates, Sync also provides:
 
 #### Using [Faye](http://faye.jcoglan.com/) (self hosted)
 
-Set your configuration in the generated config/sync.yml file, using the Faye adapter. Then run Faye alongside your app.
+Set your configuration in the generated `config/sync.yml` file, using the Faye adapter. Then run Faye alongside your app.
     
     rackup sync.ru -E production
     
