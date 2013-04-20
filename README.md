@@ -52,9 +52,13 @@ In additoinal to real-time udpates, Sync also provides:
     
     //= require sync
 
+#### 3) Add the pubsub adapter's javascript to your application layout `app/views/layouts/application.html.erb`
 
+    <%= javascript_include_tag Sync.adapter_javascript_url %>
+ 
+    
 
-#### 3) Configure your pubsub server (Faye or Pusher)
+#### 4) Configure your pubsub server (Faye or Pusher)
 
 
 #### Using [Faye](http://faye.jcoglan.com/) (self hosted)
