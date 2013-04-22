@@ -4,7 +4,12 @@
 
 
 Real-time partials with Rails. Sync lets you render partials for models that, with minimal code, 
-update in realtime in the browser when changes occur on the server. In practice, one simply only needs to replace 
+update in realtime in the browser when changes occur on the server. 
+
+#### Watch a screencast to see it in action
+[![See it in action](http://chrismccord.com/images/sync/video_thumb.png)](http://chrismccord.com/blog/2013/04/21/sync-realtime-rails-partials/)
+
+In practice, one simply only needs to replace 
 
     <%= render partial: 'user_row', locals: {user: @user} %>
   
