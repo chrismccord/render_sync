@@ -20,7 +20,7 @@ with
 Then update views realtime with a simple `sync_update(@user)` in the controller without any extra javascript or 
 configuration. 
 
-In additoinal to real-time udpates, Sync also provides:
+In addition, to real-time updates, Sync also provides:
 
   - Realtime removal of partials from the DOM when the sync'd model is destroyed in the controller via `sync_destroy(@user)`
   - Realtime appending of newly created model's on scoped channels
