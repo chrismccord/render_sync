@@ -4,6 +4,7 @@ require "net/https"
 require 'sync/controller_helpers'
 require 'sync/view_helpers'
 require 'sync/faye_extension'
+require 'sync/partial_file'
 require 'sync/partial_creator'
 require 'sync/partial'
 require 'sync/channel'
