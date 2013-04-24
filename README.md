@@ -9,13 +9,13 @@ update in realtime in the browser when changes occur on the server.
 #### Watch a screencast to see it in action
 [![See it in action](http://chrismccord.com/images/sync/video_thumb.png)](http://chrismccord.com/blog/2013/04/21/sync-realtime-rails-partials/)
 
-In practice, one simply only needs to replace
+In practice, one simply only needs to replace:
 
 ```erb
 <%= render partial: 'user_row', locals: {user: @user} %>
 ```
 
-with
+with:
 
 ```erb
 <%= sync partial: 'user_row', resource: @user %>
@@ -24,7 +24,7 @@ with
 Then update views realtime with a simple `sync_update(@user)` in the controller without any extra javascript or
 configuration.
 
-In addition, to real-time updates, Sync also provides:
+In addition to real-time updates, Sync also provides:
 
   - Realtime removal of partials from the DOM when the sync'd model is destroyed in the controller via `sync_destroy(@user)`
   - Realtime appending of newly created model's on scoped channels
