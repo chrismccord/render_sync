@@ -24,7 +24,7 @@ module Sync
       @config = {}
     end
 
-    # Loads the  configuration from a given YAML file and environment (such as production)
+    # Loads the configuration from a given YAML file and environment (such as production)
     def load_config(filename, environment)
       reset_config
       yaml = YAML.load_file(filename)[environment.to_s]
