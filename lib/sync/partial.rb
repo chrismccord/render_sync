@@ -1,19 +1,14 @@
 module Sync
-
   class Partial
     attr_accessor :name, :resource, :channel, :context
 
     def self.all(model, context)
       resource = Resource.new(model)
-      partials = []
-      Dir.foreach(Rails.root.join("app/views/sync/#{resource.plural_name}/")) do |filename|
-        partial_file = PartialFile.new(filename)
-        next unless partial_file.valid?
-        partial_name = partial_file.name_without_underscore
-        partials << Partial.new(partial_name, resource.model, nil, context)
-      end
 
-      partials
+      Dir['app/views/sync/#{resource.plural_name}/**/_*.*'].map do |partial|
+        partial_name = File.basename(partial)
+        Partial.new(partial_name[1...partial_name.index('.')], resource.model, nil, context)
+      end
     end
 
 
@@ -27,7 +22,7 @@ module Sync
     def render_to_string
       context.render_to_string(partial: path, locals: locals)
     end
-    
+
     def render
       context.render(partial: path, locals: locals)
     end
