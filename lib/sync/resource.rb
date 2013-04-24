@@ -11,7 +11,7 @@ module Sync
     end
 
     def name
-      model.class.model_name.to_s.downcase
+      model.class.model_name.to_s.underscore
     end
 
     def plural_name
