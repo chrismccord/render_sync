@@ -1,15 +1,14 @@
 module Sync
-
   class Partial
     attr_accessor :name, :resource, :channel, :context
 
     def self.all(model, context)
       resource = Resource.new(model)
       partials = []
-      Dir.foreach(Rails.root.join("app/views/sync/#{resource.plural_name}/")) do |filename|
-        partial_file = PartialFile.new(filename)
-        next unless partial_file.valid?
-        partial_name = partial_file.name_without_underscore
+      Dir.foreach(Rails.root.join("app/views/sync/#{resource.plural_name}/")) do |partial|
+        next if partial == '.' or partial == '..'
+        partial_name = partial.split(".").first
+        partial_name.slice!(0)
         partials << Partial.new(partial_name, resource.model, nil, context)
       end
 
