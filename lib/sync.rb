@@ -12,7 +12,6 @@ require 'sync/resource'
 require 'sync/clients/faye'
 require 'sync/clients/pusher'
 require 'sync/engine' if defined? Rails
-require 'faye'
 
 module Sync
 

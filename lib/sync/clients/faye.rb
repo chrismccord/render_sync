@@ -3,6 +3,7 @@ module Sync
     class Faye
 
       def setup
+        require 'faye'
         # nothing to set up
       end
 
