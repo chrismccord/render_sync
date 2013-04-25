@@ -125,6 +125,7 @@ For example, this parent view/sync partial approach would *not* work:
 Given the sync partial `_todo_row.html.erb`:
 
 ```erb
+Title:
 <%= link_to todo.title, todo %>
 ```
 
@@ -145,6 +146,7 @@ sync partial `_todo_row.html.erb`:
 
 ```erb
 <tr> <!-- root level container for the partial required here -->
+  Title:
   <%= link_to todo.title, todo %>
 </tr>
 ```
