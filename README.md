@@ -35,6 +35,7 @@ In addition to real-time updates, Sync also provides:
 
   - Ruby >= 1.9.2
   - Rails >= 3.1
+  - jQuery
 
 
 ## Installation
@@ -115,6 +116,48 @@ after_fork do |server, worker|
   Thread.new { EM.run }
 end
 ```
+
+## Current Caveats
+The current implementation uses a DOM range query (jQuery's `nextUntil`) to match your partial's "element" in 
+the DOM. The way this selector works requires your sync'd partial to be wrapped in a root level html tag for that partial file. 
+For example, this parent view/sync partial approach would *not* work:
+
+Given the sync partial `_todo_row.html.erb`:
+
+```erb
+<%= link_to todo.title, todo %>
+```
+
+And the parent view:
+
+```erb
+<table>
+  <tr>
+    <%= sync partial: 'todo_row', resource: @todo %>
+  </tr>
+</table>
+```
+
+##### The markup *would need to change to*:
+
+
+sync partial `_todo_row.html.erb`:
+
+```erb
+<tr> <!-- root level container for the partial required here -->
+  <%= link_to todo.title, todo %>
+</tr>
+```
+
+And the parent view changed to:
+
+```erb
+<table>
+  <%= sync partial: 'todo_row', resource: @todo %>
+</table>
+```
+
+I'm currently investigating true DOM ranges via the [Range](https://developer.mozilla.org/en-US/docs/DOM/range) object.
 
 
 ## Brief Example or [checkout an example application](https://github.com/chrismccord/sync_example)
