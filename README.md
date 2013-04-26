@@ -35,7 +35,7 @@ In addition to real-time updates, Sync also provides:
 
   - Ruby >= 1.9.2
   - Rails >= 3.1
-  - jQuery
+  - jQuery >= 1.9
 
 
 ## Installation
