@@ -135,7 +135,7 @@ class Sync.Partial
     @destroy() if @view.isRemoved()
 
 
-  insert: (html) -> @view.beforeInsert($(html), {})
+  insert: (html) -> @view.beforeInsert($($.trim(html)), {})
 
   destroy: ->
     @$start.remove()
