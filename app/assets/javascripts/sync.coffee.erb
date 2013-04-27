@@ -99,7 +99,7 @@ class Sync.View
   show: -> @$el.show()
 
   update: (html) -> 
-    $new = $(html)
+    $new = $($.trim(html))
     @$el.replaceWith($new)
     @$el = $new
     @afterUpdate()
