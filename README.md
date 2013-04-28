@@ -133,9 +133,11 @@ And the parent view:
 
 ```erb
 <table>
-  <tr>
-    <%= sync partial: 'todo_row', resource: @todo %>
-  </tr>
+  <tbody>
+    <tr>
+      <%= sync partial: 'todo_row', resource: @todo %>
+    </tr>
+  </tbody>
 </table>
 ```
 
@@ -155,7 +157,9 @@ And the parent view changed to:
 
 ```erb
 <table>
-  <%= sync partial: 'todo_row', resource: @todo %>
+  <tbody>
+    <%= sync partial: 'todo_row', resource: @todo %>
+  </tbody>
 </table>
 ```
 
