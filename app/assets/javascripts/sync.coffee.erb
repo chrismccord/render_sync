@@ -1,4 +1,5 @@
 $ = jQuery
+client = null
 
 @Sync = 
   
@@ -9,7 +10,7 @@ $ = jQuery
   CLIENT_ADAPTER: "<%= Sync.adapter %>"
 
   init: ->
-    @client = new Sync[@CLIENT_ADAPTER]
+    client = new Sync[@CLIENT_ADAPTER]
     $ => 
       @ready = true
       @connect()
@@ -18,10 +19,7 @@ $ = jQuery
 
   onConnectFailure: (error) -> #noop
 
-  connect: ->
-    window.client = @client
-    @client.connect()
-
+  connect: -> client.connect()
 
   onReady: (callback) ->
     if @isReady()
