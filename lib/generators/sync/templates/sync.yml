@@ -4,6 +4,7 @@ development:
   adapter_javascript_url: "http://localhost:9292/faye/faye.js" 
   auth_token: DEVELOPMENT_SECRET_TOKEN
   adapter: "Faye"
+  async: true
 
 # Pusher
 # development:
@@ -19,9 +20,11 @@ test:
   adapter_javascript_url: "http://localhost:9292/faye/faye.js" 
   adapter: "Faye"
   auth_token: "secret"
+  async: false
 
 production:
   server: "http://example.com/faye"
   adapter_javascript_url: "http://localhost:9292/faye/faye.js" 
   adapter: "Faye"
   auth_token: "<%= defined?(SecureRandom) ? SecureRandom.hex(32) : ActiveSupport::SecureRandom.hex(32) %>"
+  async: true
