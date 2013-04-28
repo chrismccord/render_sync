@@ -1,4 +1,5 @@
 require "digest/sha1"
+require "erb"
 require "net/http"
 require "net/https"
 require 'sync/controller_helpers'
