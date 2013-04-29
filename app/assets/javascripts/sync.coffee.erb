@@ -146,8 +146,11 @@ class Sync.Partial
 
 class Sync.PartialCreator
 
-  constructor: (@name, @channel, @selector) ->
+  defaultDirection: 'append'
+
+  constructor: (@name, @channel, @selector, @direction) ->
     @$el = $("[data-sync-id='#{@selector}']")
+    @direction ?= defaultDirection
     @adapter = Sync.adapter
 
 
@@ -160,8 +163,15 @@ class Sync.PartialCreator
               data.selectorEnd
 
 
+  insertPlaceholder: (html) ->
+    switch @direction
+      when "append"  then @$el.before(html)
+      when "prepend" then @$el.after(html)
+
+
+
   insert: (html, channelUpdate, channelDestroy, selectorStart, selectorEnd) ->
-    @$el.before """
+    @insertPlaceholder """
       <script type='text/javascript' data-sync-id='#{selectorStart}'></script>
       <script type='text/javascript' data-sync-el-placeholder></script>
       <script type='text/javascript' data-sync-id='#{selectorEnd}'></script>

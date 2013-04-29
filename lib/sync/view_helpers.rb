@@ -37,6 +37,8 @@ module Sync
       partial_name = options.fetch(:partial)
       resource     = options.fetch(:resource)
       scope        = options[:scope]
+      direction    = options.fetch :direction, 'append'
+
       creator = Sync::PartialCreator.new(partial_name, resource, scope, self)
       "
         <script type='text/javascript' data-sync-id='#{creator.selector}'>
@@ -44,7 +46,8 @@ module Sync
             var creator = new Sync.PartialCreator(
               '#{partial_name}',
               '#{creator.channel}',
-              '#{creator.selector}'
+              '#{creator.selector}',
+              '#{direction}'
             );
             creator.subscribe();
           });
