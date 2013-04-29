@@ -1,5 +1,4 @@
 $ = jQuery
-client = null
 
 @Sync = 
   
@@ -10,7 +9,7 @@ client = null
   CLIENT_ADAPTER: "<%= Sync.adapter %>"
 
   init: ->
-    client = new Sync[@CLIENT_ADAPTER]
+    @adapter = new Sync[@CLIENT_ADAPTER]
     $ => 
       @ready = true
       @connect()
@@ -19,7 +18,7 @@ client = null
 
   onConnectFailure: (error) -> #noop
 
-  connect: -> client.connect()
+  connect: -> @adapter.connect()
 
   onReady: (callback) ->
     if @isReady()
@@ -57,8 +56,8 @@ class Sync.Pusher
   SYNC_CHANNEL: "sync"
 
   connect: ->
-    @pusher = new window.Pusher(Sync.PUSHER_API_KEY)
-    @channel = @pusher.subscribe(@SYNC_CHANNEL)
+    @client = new window.Pusher(Sync.PUSHER_API_KEY)
+    @channel = @client.subscribe(@SYNC_CHANNEL)
 
 
   subscribe: (channel, callback) -> 
@@ -119,11 +118,12 @@ class Sync.Partial
     @$end   = $("[data-sync-id='#{@selectorEnd}']")
     @$el    = @$start.nextUntil(@$end)
     @view   = new (Sync.viewClassFromPartialName(@name))(@$el, @name)
+    @adapter = Sync.adapter
 
 
   subscribe: ->
-    client.subscribe @channelUpdate, (data) => @update(data.html)
-    client.subscribe @channelDestroy, => @remove()
+    @adapter.subscribe @channelUpdate, (data) => @update(data.html)
+    @adapter.subscribe @channelDestroy, => @remove()
 
   
   update: (html) -> @view.beforeUpdate(html, {})
@@ -148,10 +148,11 @@ class Sync.PartialCreator
 
   constructor: (@name, @channel, @selector) ->
     @$el = $("[data-sync-id='#{@selector}']")
+    @adapter = Sync.adapter
 
 
   subscribe: ->
-    client.subscribe @channel, (data) => 
+    @adapter.subscribe @channel, (data) =>
       @insert data.html,
               data.channelUpdate,
               data.channelDestroy,
