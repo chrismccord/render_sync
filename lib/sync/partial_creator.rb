@@ -11,7 +11,7 @@ module Sync
     end
 
     def channel
-      "/" + Channel.new("#{polymorphic_path}-_#{name}").signature
+      @channel ||= Channel.new("#{polymorphic_path}-_#{name}").to_s
     end
 
     def selector

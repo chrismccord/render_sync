@@ -53,15 +53,13 @@ class Sync.Faye
 
 class Sync.Pusher
 
-  SYNC_CHANNEL: "sync"
-
   connect: ->
     @client = new window.Pusher(Sync.PUSHER_API_KEY)
-    @channel = @client.subscribe(@SYNC_CHANNEL)
 
 
   subscribe: (channel, callback) -> 
-    @channel.bind channel, callback
+    channel = @client.subscribe(channel)
+    channel.bind 'sync', callback
 
 
 class Sync.View

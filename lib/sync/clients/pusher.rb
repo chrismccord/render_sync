@@ -17,6 +17,16 @@ module Sync
         Message.new(*args)
       end
 
+      # Public: Normalize channel to adapter supported format
+      #
+      # channel - The string channel name
+      #
+      # Returns The normalized channel prefixed with supported format for Pusher
+      def normalize_channel(channel)
+        channel
+      end
+
+
       class Message
 
         attr_accessor :channel, :data
@@ -41,11 +51,11 @@ module Sync
         end
 
         def publish_synchronous
-          ::Pusher.trigger(['sync'], channel, data)
+          ::Pusher.trigger([channel], 'sync', data)
         end
 
         def publish_asynchronous
-          ::Pusher.trigger_async(['sync'], channel, data)
+          ::Pusher.trigger_async([channel], 'sync', data)
         end
       end
     end

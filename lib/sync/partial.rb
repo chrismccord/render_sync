@@ -35,20 +35,20 @@ module Sync
       Sync.client.build_message channel_for_action(action), html: render_to_string
     end
 
-    def channel_id
-      Channel.new("#{polymorphic_path}-_#{name}").signature
+    def channel_prefix
+      @channel_prefix ||= Channel.new("#{polymorphic_path}-_#{name}").to_s
     end
 
     def channel_for_action(action)
-      "/#{channel_id}-#{action}"
+      "#{channel_prefix}-#{action}"
     end
 
     def selector_start
-      "#{channel_id}-start"
+      "#{channel_prefix}-start"
     end
 
     def selector_end
-      "#{channel_id}-end"
+      "#{channel_prefix}-end"
     end
 
 

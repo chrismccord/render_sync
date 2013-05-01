@@ -2,11 +2,17 @@ require_relative '../test_helper'
 require 'mocha/setup'
 
 
-describe "Faye::Message" do
+describe "Faye" do
   include TestHelperFaye
 
   before do
     @message = Sync.client.build_message("/my-channel", html: "<p>Some Data</p>")
+  end
+
+  describe "normalize_channel" do
+    it 'converts channel to faye server friendly format with leading forward-slash' do
+      assert_equal "/", Sync.client.normalize_channel("alfjalkjfkfjaslkfj2342424").first
+    end
   end
 
   describe '#to_hash' do
@@ -82,13 +88,18 @@ end
 
 
 
-describe "Pusher::Message" do
+describe "Pusher" do
   include TestHelperPusher
 
   before do
     @message = Sync.client.build_message("/my-channel", html: "<p>Some Data</p>")
   end
 
+  describe "normalize_channel" do
+    it 'converts channel to pusher server friendly format without leading forward-slash' do
+      refute Sync.client.normalize_channel("alfjalkjfkfjaslkfj2342424").first == "/"
+    end
+  end
 
   describe '#to_json' do
     it "Converts message to json for Faye publish" do

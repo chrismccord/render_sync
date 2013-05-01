@@ -52,9 +52,9 @@ describe Sync::Partial do
     end
   end
 
-  describe '#channel_id' do
-    it 'returns a unique channel for the partial given its name and resource' do
-      assert @partial.channel_id
+  describe '#channel_prefix' do
+    it 'returns a unique channel prefix for the partial given its name and resource' do
+      assert @partial.channel_prefix
     end
   end
 

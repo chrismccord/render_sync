@@ -15,5 +15,9 @@ module Sync
         self.name
       )
     end
+
+    def to_s
+      Sync.client.normalize_channel(self.signature)
+    end
   end
 end

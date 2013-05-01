@@ -15,6 +15,15 @@ module Sync
         Message.new(*args)
       end
 
+      # Public: Normalize channel to adapter supported format
+      #
+      # channel - The string channel name
+      #
+      # Returns The normalized channel prefixed with supported format for Faye
+      def normalize_channel(channel)
+        "/#{channel}"
+      end
+
 
       class Message
 
