@@ -185,6 +185,7 @@ View `users/index.html.erb`
 <table>
   <tbody>
     <%= sync partial: 'user_list_row', collection: @users %>
+    <%= sync_new partial: 'user_list_row', resource: User.new, direction: :append %>
   </tbody>
 </table>
 ```
@@ -195,6 +196,17 @@ Controller
 ```ruby
 def UsersController < ApplicationController
   …
+  def create
+    @user = User.new(user_params)
+    if @user.save
+      sync_new @user      
+    end
+    respond_to do |format|
+      format.html { redirect_to users_url }
+      format.json { head :no_content }
+    end
+  end
+
   def update
     @user = User.find(params[:id])
     if user.save
