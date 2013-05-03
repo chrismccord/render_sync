@@ -14,6 +14,12 @@ $ = jQuery
       @ready = true
       @connect()
       @flushReadyQueue()
+      @bindUnsubscribe()
+
+
+  # Handle Turbolinks teardown, unsubscribe from all channels before transition
+  bindUnsubscribe: ->
+    document.addEventListener "page:fetch", => @adapter.unsubscribeAll()
 
 
   onConnectFailure: (error) -> #noop
@@ -43,23 +49,38 @@ $ = jQuery
 
 class Sync.Faye
 
+  subscriptions: []
+
   connect: ->
     @client = new window.Faye.Client(Sync.FAYE_HOST)
 
 
   subscribe: (channel, callback) -> 
-    @client.subscribe channel, callback
+    @subscriptions.push(@client.subscribe channel, callback)
+
+
+  unsubscribeAll: ->
+    subscription.cancel() for subscription in @subscriptions
+    @subscriptions = []
 
 
 class Sync.Pusher
+
+  subscriptions: []
 
   connect: ->
     @client = new window.Pusher(Sync.PUSHER_API_KEY)
 
 
   subscribe: (channel, callback) -> 
+    @subscriptions.push channel
     channel = @client.subscribe(channel)
     channel.bind 'sync', callback
+
+
+  unsubscribeAll: ->
+    @client.unsubscribe(subscription) for subscription in @subscriptions
+    @subscriptions = []
 
 
 class Sync.View
