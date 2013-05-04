@@ -165,6 +165,45 @@ And the parent view changed to:
 
 I'm currently investigating true DOM ranges via the [Range](https://developer.mozilla.org/en-US/docs/DOM/range) object.
 
+## Syncing outside of the controller
+
+`Sync::Actions` can be included into any object wishing to perform sync
+publishes for a given resource. Instead of using the the controller as
+context for rendering, a Sync::Renderer instance is used. Since the Renderer
+is not part of the request/response/session, it has no knowledge of the
+current session (ie. current_user), so syncing from outside the controller
+context will require some care that the partial can be rendered within a
+sessionless context.
+
+Here's an example from syncing within a model, *take extreme care with using active record callbacks*, you may unintentionally mass publish if doing standard background updates for a large model set. 
+
+```ruby
+class Todo < ActiveRecord::Base
+  include Sync::Actions
+
+  belongs_to :project, counter_cache: true
+
+  after_create do
+    sync_new self, scope: self.project
+  end
+  after_save do
+    sync_update [self, self.project.reload]
+  end
+  after_destroy do 
+    sync_destroy self
+    sync_update self.project.reload
+  end
+end
+
+```
+
+Locally I'm experimenting with a convention to conditionally run the sync callbacks, with
+`todo.with_sync.update_attributes(todo_parms)`
+`todo.with_sync.destroy`
+
+Explicitly syncing may be the best way to go, but depending on your requirements, 
+the `Sync::Actions` module should let you handle whatever way you see fit.
+
 
 ## Brief Example or [checkout an example application](https://github.com/chrismccord/sync_example)
 
