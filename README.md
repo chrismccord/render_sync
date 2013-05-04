@@ -165,6 +165,40 @@ And the parent view changed to:
 
 I'm currently investigating true DOM ranges via the [Range](https://developer.mozilla.org/en-US/docs/DOM/range) object.
 
+
+## Custom Sync Views and javascript hooks
+
+Sync allows you to hook into and override or extend all of the actions it performs when updating partials on the client side. When a sync partial is rendered, sync will instantiate a javascript View class based on the following order of lookup:
+
+ 1. The camelized version of the snake cased partial name.
+ 2. The camelized version of the concatenated snake case resource
+    and partial names.
+
+#### Examples
+
+partial name 'list_row', resource name 'todo', order of lookup:
+
+ 1. Sync.ListRow
+ 2. Sync.TodoListRow
+ 3. Sync.View (Default fallback)
+
+
+For example, if you wanted to fade in/out a row in a sync'd todo list instead of the Sync.View default of instant insert/remove:
+
+```coffeescript
+class Sync.TodoListRow extends Sync.View
+
+  beforeInsert: ($el) ->
+    $el.hide()
+    @insert($el)
+
+  afterInsert: -> @$el.fadeIn 'slow'
+
+  beforeRemove: -> @$el.fadeOut 'slow', => @remove()
+
+```
+
+
 ## Syncing outside of the controller
 
 `Sync::Actions` can be included into any object wishing to perform sync
