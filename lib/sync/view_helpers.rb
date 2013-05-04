@@ -28,6 +28,7 @@ module Sync
             Sync.onReady(function(){
               var partial = new Sync.Partial(
                 '#{partial.name}',
+                '#{partial.resource.name}',
                 '#{partial.channel_for_action(:update)}',
                 '#{partial.channel_for_action(:destroy)}',
                 '#{partial.selector_start}',
@@ -77,6 +78,7 @@ module Sync
           Sync.onReady(function(){
             var creator = new Sync.PartialCreator(
               '#{partial_name}',
+              '#{creator.resource.name}',
               '#{creator.channel}',
               '#{creator.selector}',
               '#{direction}'

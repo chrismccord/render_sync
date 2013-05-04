@@ -43,8 +43,24 @@ $ = jQuery
   camelize: (str) ->
     str.replace /(?:^|[-_])(\w)/g, (match, camel) -> camel?.toUpperCase() ? ''
 
-  
-  viewClassFromPartialName: (name) -> Sync[@camelize(name)] ? Sync.View
+
+  # Find View class to render based on partial and resource names
+  # The class name is looked up based on
+  #  1. The camelized version of the snake cased partialName.
+  #  2. The camelized version of the concatenated snake case resource
+  #     and partial names.
+  #
+  # Examples
+  #   partialName 'list_row', resourceName 'todo', order of lookup:
+  #   Sync.ListRow
+  #   Sync.TodoListRow
+  #   Sync.View
+  #
+  # Defaults to Sync.View if no custom view class has been defined
+  viewClassFromPartialName: (partialName, resourceName) ->
+    Sync[@camelize(partialName)] ?
+    Sync[@camelize("#{resourceName}_#{partialName}")] ?
+    Sync.View
 
 
 class Sync.Faye
@@ -132,11 +148,11 @@ class Sync.View
 
 class Sync.Partial
 
-  constructor: (@name, @channelUpdate, @channelDestroy, @selectorStart, @selectorEnd) ->
+  constructor: (@name, @resourceName, @channelUpdate, @channelDestroy, @selectorStart, @selectorEnd) ->
     @$start = $("[data-sync-id='#{@selectorStart}']")
     @$end   = $("[data-sync-id='#{@selectorEnd}']")
     @$el    = @$start.nextUntil(@$end)
-    @view   = new (Sync.viewClassFromPartialName(@name))(@$el, @name)
+    @view   = new (Sync.viewClassFromPartialName(@name, @resourceName))(@$el, @name)
     @adapter = Sync.adapter
 
 
@@ -167,7 +183,7 @@ class Sync.PartialCreator
 
   defaultDirection: 'append'
 
-  constructor: (@name, @channel, @selector, @direction) ->
+  constructor: (@name, @resourceName, @channel, @selector, @direction) ->
     @$el = $("[data-sync-id='#{@selector}']")
     @direction ?= defaultDirection
     @adapter = Sync.adapter
@@ -197,6 +213,7 @@ class Sync.PartialCreator
     """
     partial = new Sync.Partial(
       @name,
+      @resourceName,
       channelUpdate,
       channelDestroy,
       selectorStart,
