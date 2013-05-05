@@ -20,11 +20,11 @@ module Sync
     end
 
     def render_to_string
-      context.render_to_string(partial: path, locals: locals)
+      context.render_to_string(partial: path, locals: locals, formats: [:html])
     end
 
     def render
-      context.render(partial: path, locals: locals)
+      context.render(partial: path, locals: locals, formats: [:html])
     end
 
     def sync(action)
