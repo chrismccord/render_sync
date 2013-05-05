@@ -46,20 +46,20 @@ $ = jQuery
 
   # Find View class to render based on partial and resource names
   # The class name is looked up based on
-  #  1. The camelized version of the snake cased partialName.
-  #  2. The camelized version of the concatenated snake case resource
+  #  1. The camelized version of the concatenated snake case resource
   #     and partial names.
+  #  2. The camelized version of the snake cased partialName.
   #
   # Examples
   #   partialName 'list_row', resourceName 'todo', order of lookup:
-  #   Sync.ListRow
   #   Sync.TodoListRow
+  #   Sync.ListRow
   #   Sync.View
   #
   # Defaults to Sync.View if no custom view class has been defined
   viewClassFromPartialName: (partialName, resourceName) ->
-    Sync[@camelize(partialName)] ?
     Sync[@camelize("#{resourceName}_#{partialName}")] ?
+    Sync[@camelize(partialName)] ?
     Sync.View
 
 

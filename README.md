@@ -170,16 +170,16 @@ I'm currently investigating true DOM ranges via the [Range](https://developer.mo
 
 Sync allows you to hook into and override or extend all of the actions it performs when updating partials on the client side. When a sync partial is rendered, sync will instantiate a javascript View class based on the following order of lookup:
 
- 1. The camelized version of the snake cased partial name.
- 2. The camelized version of the concatenated snake case resource
+ 1. The camelized version of the concatenated snake case resource
     and partial names.
+ 2. The camelized version of the snake cased partial name.
 
 #### Examples
 
 partial name 'list_row', resource name 'todo', order of lookup:
 
- 1. Sync.ListRow
- 2. Sync.TodoListRow
+ 1. Sync.TodoListRow
+ 2. Sync.ListRow
  3. Sync.View (Default fallback)
 
 
