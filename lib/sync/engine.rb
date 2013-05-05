@@ -7,6 +7,12 @@ module Sync
       Sync.load_config(path, Rails.env) if path.exist?
     end
 
+    initializer "sync.event_machine" do
+      if Sync.async?
+        Thread.new { EM.run } if defined?(EM) && !EM.reactor_running?
+      end
+    end
+
     # Adds the ViewHelpers into ActionView::Base
     initializer "sync.view_helpers" do
       ActionView::Base.send :include, ViewHelpers
