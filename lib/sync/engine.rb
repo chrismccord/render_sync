@@ -2,7 +2,7 @@ module Sync
 
   class Engine < Rails::Engine
     # Loads the sync.yml file if it exists.
-    initializer "sync.config" do
+    initializer "sync.config", group: :all do
       path = Rails.root.join("config/sync.yml")
       Sync.load_config(path, Rails.env) if path.exist?
     end
