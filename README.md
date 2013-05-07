@@ -21,7 +21,7 @@ with:
 <%= sync partial: 'user_row', resource: @user %>
 ```
 
-Then update views realtime with a simple `sync_update(@user)` in the controller without any extra javascript or
+Then update views realtime automatically with the `sync` DSL or with a with a simple `sync_update(@user)` in the controller without any extra javascript or
 configuration.
 
 In addition to real-time updates, Sync also provides:
@@ -166,6 +166,56 @@ And the parent view changed to:
 I'm currently investigating true DOM ranges via the [Range](https://developer.mozilla.org/en-US/docs/DOM/range) object.
 
 
+## 'Automatic' syncing through the sync DSL
+
+In addition to calling explicit sync actions within controller methods, a
+`sync` and `enable_sync` DSL has been added to ActionController::Base and ActiveRecord::Base to automate the syncing 
+approach in a controlled, threadsafe way.
+
+### Example Controller/Model
+```ruby
+  class TodosController < ApplicationController
+
+    enable_sync only: [:create, :update, :destroy]
+    ...
+  end
+
+  class Todo < ActiveRecord::Base
+
+    belongs_to :project, counter_cache: true
+    has_many :comments, dependent: :destroy
+
+    sync :all, scope: :project
+
+  end
+```
+
+### Syncing outside of the controller
+
+`Sync::Actions` can be included into any object wishing to perform sync
+publishes for a given resource. Instead of using the the controller as
+context for rendering, a Sync::Renderer instance is used. Since the Renderer
+is not part of the request/response/session, it has no knowledge of the
+current session (ie. current_user), so syncing from outside the controller
+context will require some care that the partial can be rendered within a
+sessionless context.
+
+### Example Syncing from a background worker or rails console
+```ruby
+ # Inside some script/worker
+  Sync::Model.enable do
+    Todo.first.update title: "This todo will be sync'd on save"
+  end
+  Todo.first.update title: "This todo will NOT be sync'd on save"
+
+  Sync::Model.enable!
+  Todo.first.update title: "This todo will be sync'd on save"
+  Todo.first.update title: "This todo will be sync'd on save"
+  Todo.first.update title: "This todo will be sync'd on save"
+  Sync::Model.disable!
+  Todo.first.update title: "This todo will NOT be sync'd on save"
+```
+  
 ## Custom Sync Views and javascript hooks
 
 Sync allows you to hook into and override or extend all of the actions it performs when updating partials on the client side. When a sync partial is rendered, sync will instantiate a javascript View class based on the following order of lookup:
@@ -197,47 +247,6 @@ class Sync.TodoListRow extends Sync.View
   beforeRemove: -> @$el.fadeOut 'slow', => @remove()
 
 ```
-
-
-## Syncing outside of the controller
-
-`Sync::Actions` can be included into any object wishing to perform sync
-publishes for a given resource. Instead of using the the controller as
-context for rendering, a Sync::Renderer instance is used. Since the Renderer
-is not part of the request/response/session, it has no knowledge of the
-current session (ie. current_user), so syncing from outside the controller
-context will require some care that the partial can be rendered within a
-sessionless context.
-
-Here's an example from syncing within a model, *take extreme care with using active record callbacks*, you may unintentionally mass publish if doing standard background updates for a large model set. 
-
-```ruby
-class Todo < ActiveRecord::Base
-  include Sync::Actions
-
-  belongs_to :project, counter_cache: true
-
-  after_create do
-    sync_new self, scope: self.project
-  end
-  after_save do
-    sync_update [self, self.project.reload]
-  end
-  after_destroy do 
-    sync_destroy self
-    sync_update self.project.reload
-  end
-end
-
-```
-
-Locally I'm experimenting with a convention to conditionally run the sync callbacks, with
-`todo.with_sync.update_attributes(todo_parms)`
-`todo.with_sync.destroy`
-
-Explicitly syncing may be the best way to go, but depending on your requirements, 
-the `Sync::Actions` module should let you handle whatever way you see fit.
-
 
 ## Brief Example or [checkout an example application](https://github.com/chrismccord/sync_example)
 
