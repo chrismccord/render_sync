@@ -21,6 +21,10 @@ module Sync
   class << self
     attr_accessor :config, :client
 
+    def config
+      @config || {}
+    end
+
     # Resets the configuration to the default (empty hash)
     def reset_config
       @config = {}
