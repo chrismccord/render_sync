@@ -13,6 +13,10 @@ module Sync
       end
     end
 
+    initializer "sync.activerecord" do
+      ActiveRecord::Base.send :extend, Model::ClassMethods
+    end
+
     # Adds the ViewHelpers into ActionView::Base
     initializer "sync.view_helpers" do
       ActionView::Base.send :include, ViewHelpers
