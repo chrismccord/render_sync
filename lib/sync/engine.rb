@@ -9,7 +9,7 @@ module Sync
 
     initializer "sync.event_machine" do
       if Sync.async?
-        Thread.new { EM.run } if defined?(EM) && !EM.reactor_running?
+        Thread.new { EM.run } unless EM.reactor_running?
       end
     end
 

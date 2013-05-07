@@ -18,7 +18,7 @@ require 'sync/engine' if defined? Rails
 module Sync
 
   class << self
-    attr_reader :config, :client
+    attr_accessor :config, :client
 
     # Resets the configuration to the default (empty hash)
     def reset_config
