@@ -9,14 +9,8 @@ module Sync
     end
 
     module ClassMethods
-      def sync_action(*actions)
-        options = {}
-        options = actions.last if actions.last.is_a? Hash
-        if actions.include? :all
-          around_filter :enable_sync, options
-        else
-          around_filter :enable_sync, only: actions
-        end
+      def enable_sync(options = {})
+        around_filter :enable_sync, options
       end
     end
 
