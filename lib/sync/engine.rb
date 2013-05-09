@@ -8,9 +8,7 @@ module Sync
     end
 
     initializer "sync.event_machine" do
-      if Sync.async?
-        Thread.new { EM.run } unless EM.reactor_running?
-      end
+      Sync.reactor.start if Sync.async?
     end
 
     initializer "sync.activerecord" do

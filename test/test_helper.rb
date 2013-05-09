@@ -4,6 +4,8 @@ require 'minitest/autorun'
 require 'minitest/pride'
 require 'yaml'
 require 'json'
+require 'pry'
+
 require_relative 'em_minitest_spec'
 
 Bundler.require(:default)

@@ -14,6 +14,7 @@ require 'sync/channel'
 require 'sync/resource'
 require 'sync/clients/faye'
 require 'sync/clients/pusher'
+require 'sync/reactor'
 require 'sync/engine' if defined? Rails
 
 module Sync
@@ -70,6 +71,10 @@ module Sync
 
     def api_key
       config[:api_key]
+    end
+
+    def reactor
+      @reactor ||= Reactor.new
     end
 
     # Returns the Faye Rack application.
