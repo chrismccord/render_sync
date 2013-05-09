@@ -46,7 +46,7 @@ In addition to real-time updates, Sync also provides:
 
 ```ruby
 gem 'faye'
-gem 'thin'
+gem 'thin', require: false
 gem 'sync'
 ```
 
