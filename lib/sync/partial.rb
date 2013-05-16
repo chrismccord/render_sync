@@ -32,7 +32,8 @@ module Sync
     end
 
     def message(action)
-      Sync.client.build_message channel_for_action(action), html: render_to_string
+      Sync.client.build_message channel_for_action(action), 
+        html: (render_to_string unless action.to_s == "destroy")
     end
 
     def channel_prefix
