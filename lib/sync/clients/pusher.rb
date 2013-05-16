@@ -55,7 +55,9 @@ module Sync
         end
 
         def publish_asynchronous
-          ::Pusher.trigger_async([channel], 'sync', data)
+          Sync.reactor.perform do
+            ::Pusher.trigger_async([channel], 'sync', data)
+          end
         end
       end
     end

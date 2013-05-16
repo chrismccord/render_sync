@@ -56,7 +56,8 @@ describe "Faye" do
 
     describe '#publish' do
       it 'Publishes a message to Faye' do
-        assert @message.publish
+        Sync.reactor.expects(:perform).once
+        @message.publish
       end
     end
   end
@@ -126,7 +127,8 @@ describe "Pusher" do
 
     describe '#publish' do
       it 'Publishes a message to Pusher' do
-        assert @message.publish
+        Sync.reactor.expects(:perform).once
+        @message.publish
       end
     end
   end

@@ -1,3 +1,4 @@
+require 'monitor'
 require "digest/sha1"
 require "erb"
 require "net/http"

@@ -7,10 +7,6 @@ module Sync
       Sync.load_config(path, Rails.env) if path.exist?
     end
 
-    initializer "sync.event_machine" do
-      Sync.reactor.start if Sync.async?
-    end
-
     initializer "sync.activerecord" do
       ActiveRecord::Base.send :extend, Model::ClassMethods
     end

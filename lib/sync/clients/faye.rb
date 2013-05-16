@@ -45,9 +45,11 @@ module Sync
         end
 
         def self.batch_publish_asynchronous(messages)
-          EM::HttpRequest.new(Sync.server).post(query: {
-            message: batch_messages_query_hash(messages).to_json
-          })
+          Sync.reactor.perform do
+            EM::HttpRequest.new(Sync.server).post(query: {
+              message: batch_messages_query_hash(messages).to_json
+            })
+          end
         end
 
         def self.batch_messages_query_hash(messages)
@@ -90,9 +92,11 @@ module Sync
         end
 
         def publish_asynchronous
-          EM::HttpRequest.new(Sync.server).post(query: {
-            message: self.to_json
-          })
+          Sync.reactor.perform do
+            EM::HttpRequest.new(Sync.server).post(query: {
+              message: self.to_json
+            })
+          end
         end
       end
     end
