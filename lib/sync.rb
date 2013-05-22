@@ -16,7 +16,10 @@ require 'sync/resource'
 require 'sync/clients/faye'
 require 'sync/clients/pusher'
 require 'sync/reactor'
-require 'sync/engine' if defined? Rails
+if defined? Rails
+  require 'sync/erb_tracker'
+  require 'sync/engine'
+end
 
 module Sync
 

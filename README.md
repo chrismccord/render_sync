@@ -222,6 +222,37 @@ class Sync.TodoListRow extends Sync.View
 
 ```
 
+## Using with cache_digests (Russian doll caching)
+
+Sync has a custom `DependencyTracker::ERBTracker` that can handle `sync` render calls.
+Because the full partial name is not included, it has to guess the location of
+your partial based on the name of the `resource` or `collection` passed to it.
+See the tests to see how it works. If it doesn't work for you, you can always
+use the [explicit "Template Dependency"
+markers](https://github.com/rails/cache_digests).
+
+To enable, add to `config/initializers/cache_digests.rb`:
+
+#### Rails 4
+
+```ruby
+require 'action_view/dependency_tracker'
+
+ActionView::DependencyTracker.register_tracker :haml, Sync::ERBTracker
+ActionView::DependencyTracker.register_tracker :erb, Sync::ERBTracker
+```
+
+#### Rails 3 with [cache_digests](https://github.com/rails/cache_digests) gem
+
+```ruby
+require 'cache_digests/dependency_tracker'
+
+CacheDigests::DependencyTracker.register_tracker :haml, Sync::ERBTracker
+CacheDigests::DependencyTracker.register_tracker :erb, Sync::ERBTracker
+```
+
+**Note:** haml support is limited, but it seems to work in most cases.
+
 ## Brief Example or [checkout an example application](https://github.com/chrismccord/sync_example)
 
 View `sync/users/_user_list_row.html.erb`
