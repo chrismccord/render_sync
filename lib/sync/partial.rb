@@ -5,12 +5,11 @@ module Sync
     def self.all(model, context)
       resource = Resource.new(model)
 
-      Dir["app/views/sync/#{resource.plural_name}/**/_*.*"].map do |partial|
+      Dir["app/views/sync/#{resource.plural_name}/_*.*"].map do |partial|
         partial_name = File.basename(partial)
         Partial.new(partial_name[1...partial_name.index('.')], resource.model, nil, context)
       end
     end
-
 
     def initialize(name, resource, channel, context)
       self.name = name
@@ -36,8 +35,16 @@ module Sync
         html: (render_to_string unless action.to_s == "destroy")
     end
 
+    def authorized?(auth_token)
+      self.auth_token == auth_token
+    end
+
+    def auth_token
+      @auth_token ||= Channel.new("#{polymorphic_path}-_#{name}").to_s
+    end
+
     def channel_prefix
-      @channel_prefix ||= Channel.new("#{polymorphic_path}-_#{name}").to_s
+      @channel_prefix ||= auth_token
     end
 
     def channel_for_action(action)
@@ -50,6 +57,10 @@ module Sync
 
     def selector_end
       "#{channel_prefix}-end"
+    end
+
+    def creator_for_scope(scope)
+      PartialCreator.new(name, resource.model, scope, context)
     end
 
 

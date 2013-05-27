@@ -10,8 +10,12 @@ module Sync
       self.partial = Partial.new(name, self.resource.model, nil, context)
     end
 
+    def auth_token
+      @auth_token ||= Channel.new("#{polymorphic_path}-_#{name}").to_s
+    end
+
     def channel
-      @channel ||= Channel.new("#{polymorphic_path}-_#{name}").to_s
+      @channel ||= auth_token
     end
 
     def selector
@@ -25,6 +29,8 @@ module Sync
     def message
       Sync.client.build_message(channel,
         html: partial.render_to_string,
+        resourceId: resource.id,
+        authToken: partial.auth_token,
         channelUpdate: partial.channel_for_action(:update),
         channelDestroy: partial.channel_for_action(:destroy),
         selectorStart: partial.selector_start,

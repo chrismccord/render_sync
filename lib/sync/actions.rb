@@ -44,15 +44,10 @@ module Sync
     #   scope - The ActiveModel resource to scope destroy channel to
     #   
     def sync(resource, action, options = {})
-      channel = options[:channel]
       resources = [resource].flatten
       messages = resources.collect do |resource|
-        if channel
-          Sync::Partial.new(channel, resource, channel, sync_render_context).message(action)
-        else
-          Sync::Partial.all(resource, sync_render_context).collect do |partial|
-            partial.message(action)
-          end
+        all_partials(resource, sync_render_context).collect do |partial|
+          partial.message(action)
         end
       end
 
@@ -71,8 +66,8 @@ module Sync
       scope = options[:scope]
       resources = [resource].flatten
       messages = resources.collect do |resource|
-        Sync::Partial.all(resource, sync_render_context).collect do |partial|
-          Sync::PartialCreator.new(partial.name, resource, scope, sync_render_context).message
+        all_partials(resource, sync_render_context).collect do |partial|
+          partial.creator_for_scope(scope).message
         end
       end
 
@@ -85,6 +80,12 @@ module Sync
     # The Context class handling partial rendering
     def sync_render_context
       @sync_render_context ||= Renderer.new
+    end
+
+    # Returns Array of Partials for all given resource and context, including
+    # both Partial and RefetchPartial instances
+    def all_partials(resource, context)
+      Partial.all(resource, context) + RefetchPartial.all(resource, context)
     end
   end
 end

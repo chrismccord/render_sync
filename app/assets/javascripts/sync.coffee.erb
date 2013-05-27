@@ -148,7 +148,32 @@ class Sync.View
 
 class Sync.Partial
 
-  constructor: (@name, @resourceName, @channelUpdate, @channelDestroy, @selectorStart, @selectorEnd) ->
+  attributes:
+    name: null
+    resourceName: null
+    resourceId: null
+    authToken: null
+    channelUpdate: null
+    channelDestroy: null
+    selectorStart: null
+    selectorEnd: null
+    refetch: false
+
+  # attributes
+  #
+  #   name - The String name of the partial without leading underscore
+  #   resourceName - The String undercored class name of the resource
+  #   resourceId
+  #   authToken - The String auth token for the partial
+  #   channelUpdate - The String channel to listen for update publishes on
+  #   channelDestroy - The String channel to listen for destroy publishes on
+  #   selectorStart - The String selector to mark beginning in the DOM
+  #   selectorEnd - The String selector to mark ending in the DOM
+  #   refetch - The Boolean to refetch markup from server or receive markup
+  #             from pubsub update. Default false.
+  #
+  constructor: (attributes = {}) ->
+    @[key] = attributes[key] ? defaultValue for key, defaultValue of @attributes
     @$start = $("[data-sync-id='#{@selectorStart}']")
     @$end   = $("[data-sync-id='#{@selectorEnd}']")
     @$el    = @$start.nextUntil(@$end)
@@ -157,7 +182,12 @@ class Sync.Partial
 
 
   subscribe: ->
-    @adapter.subscribe @channelUpdate, (data) => @update(data.html)
+    @adapter.subscribe @channelUpdate, (data) =>
+      if @refetch
+        @refetchFromServer (html) => @update(html)
+      else
+        @update(data.html)
+
     @adapter.subscribe @channelDestroy, => @remove()
 
   
@@ -168,7 +198,12 @@ class Sync.Partial
     @destroy() if @view.isRemoved()
 
 
-  insert: (html) -> @view.beforeInsert($($.trim(html)), {})
+  insert: (html) ->
+    if @refetch
+      @refetchFromServer (html) => @view.beforeInsert($($.trim(html)), {})
+    else
+      @view.beforeInsert($($.trim(html)), {})
+
 
   destroy: ->
     @$start.remove()
@@ -179,19 +214,50 @@ class Sync.Partial
     delete @$el
 
 
+  refetchFromServer: (callback) ->
+    $.ajax
+      type: "GET"
+      url: "/sync/refetch.json"
+      data:
+        auth_token: @authToken
+        partial_name: @name
+        resource_name: @resourceName
+        resource_id: @resourceId
+      success: (data) -> callback(data.html)
+
+
 class Sync.PartialCreator
 
-  defaultDirection: 'append'
+  attributes:
+    name: null
+    resourceName: null
+    authToken: null
+    channel: null
+    selector: null
+    direction: 'append'
+    refetch: false
 
-  constructor: (@name, @resourceName, @channel, @selector, @direction) ->
+  # attributes
+  #
+  #   name - The String name of the partial without leading underscore
+  #   resourceName - The String undercored class name of the resource
+  #   channel - The String channel to listen for new publishes on
+  #   selector - The String selector to find the element in the DOM
+  #   direction - The String direction to insert. One of "append" or "prepend"
+  #   refetch - The Boolean to refetch markup from server or receive markup
+  #             from pubsub update. Default false.
+  #
+  constructor: (attributes = {}) ->
+    @[key] = attributes[key] ? defaultValue for key, defaultValue of @attributes
     @$el = $("[data-sync-id='#{@selector}']")
-    @direction ?= defaultDirection
     @adapter = Sync.adapter
 
 
   subscribe: ->
     @adapter.subscribe @channel, (data) =>
       @insert data.html,
+              data.resourceId,
+              data.authToken,
               data.channelUpdate,
               data.channelDestroy,
               data.selectorStart,
@@ -205,19 +271,22 @@ class Sync.PartialCreator
 
 
 
-  insert: (html, channelUpdate, channelDestroy, selectorStart, selectorEnd) ->
+  insert: (html, resourceId, authToken, channelUpdate, channelDestroy, selectorStart, selectorEnd) ->
     @insertPlaceholder """
       <script type='text/javascript' data-sync-id='#{selectorStart}'></script>
       <script type='text/javascript' data-sync-el-placeholder></script>
       <script type='text/javascript' data-sync-id='#{selectorEnd}'></script>
     """
     partial = new Sync.Partial(
-      @name,
-      @resourceName,
-      channelUpdate,
-      channelDestroy,
-      selectorStart,
-      selectorEnd
+      name: @name
+      resourceName: @resourceName
+      resourceId: resourceId
+      authToken: authToken
+      channelUpdate: channelUpdate
+      channelDestroy: channelDestroy
+      selectorStart: selectorStart
+      selectorEnd: selectorEnd
+      refetch: @refetch
     )
     partial.subscribe()
     partial.insert(html)

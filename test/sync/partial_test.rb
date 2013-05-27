@@ -84,4 +84,11 @@ describe Sync::Partial do
       assert @partial.selector_end.present?
     end
   end
+
+  describe 'creator_for_scope' do
+    it 'returns a new PartialCreator for given scope' do
+      assert_equal Sync::PartialCreator, @partial.creator_for_scope(nil).class
+      assert @partial, @partial.creator_for_scope(nil).partial
+    end
+  end
 end

@@ -19,33 +19,41 @@ module Sync
       channel      = options[:channel]
       partial_name = options.fetch(:partial, channel)
       collection   = options[:collection] || [options.fetch(:resource)]
-      
-      result = [] 
+      refetch      = options.fetch(:refetch, false)
+
+      results = []
       collection.each do |resource|
-        partial = Sync::Partial.new(partial_name, resource, channel, self)
-        result << "
+        if refetch
+          partial = RefetchPartial.new(partial_name, resource, channel, self)
+        else
+          partial = Partial.new(partial_name, resource, channel, self)
+        end
+        results << "
           <script type='text/javascript' data-sync-id='#{partial.selector_start}'>
             Sync.onReady(function(){
-              var partial = new Sync.Partial(
-                '#{partial.name}',
-                '#{partial.resource.name}',
-                '#{partial.channel_for_action(:update)}',
-                '#{partial.channel_for_action(:destroy)}',
-                '#{partial.selector_start}',
-                '#{partial.selector_end}'
-              );
+              var partial = new Sync.Partial({
+                name:           '#{partial.name}',
+                resourceName:   '#{partial.resource.name}',
+                resourceId:     '#{resource.id}',
+                authToken:      '#{partial.auth_token}',
+                channelUpdate:  '#{partial.channel_for_action(:update)}',
+                channelDestroy: '#{partial.channel_for_action(:destroy)}',
+                selectorStart:  '#{partial.selector_start}',
+                selectorEnd:    '#{partial.selector_end}',
+                refetch:        #{refetch}
+              });
               partial.subscribe();
             });
           </script>
         ".html_safe
-        result << partial.render
-        result << "
+        results << partial.render
+        results << "
           <script type='text/javascript' data-sync-id='#{partial.selector_end}'>
           </script>
         ".html_safe
       end
 
-      safe_join(result)
+      safe_join(results)
     end
 
     # Setup listener for new resource from sync_new channel, appending
@@ -71,18 +79,24 @@ module Sync
       resource     = options.fetch(:resource)
       scope        = options[:scope]
       direction    = options.fetch :direction, 'append'
+      refetch      = options.fetch(:refetch, false)
 
-      creator = Sync::PartialCreator.new(partial_name, resource, scope, self)
+      if refetch
+        creator = RefetchPartialCreator.new(partial_name, resource, scope, self)
+      else
+        creator = PartialCreator.new(partial_name, resource, scope, self)
+      end
       "
         <script type='text/javascript' data-sync-id='#{creator.selector}'>
           Sync.onReady(function(){
-            var creator = new Sync.PartialCreator(
-              '#{partial_name}',
-              '#{creator.resource.name}',
-              '#{creator.channel}',
-              '#{creator.selector}',
-              '#{direction}'
-            );
+            var creator = new Sync.PartialCreator({
+              name:         '#{partial_name}',
+              resourceName: '#{creator.resource.name}',
+              channel:      '#{creator.channel}',
+              selector:     '#{creator.selector}',
+              direction:    '#{direction}',
+              refetch:      #{refetch}
+            });
             creator.subscribe();
           });
         </script>
