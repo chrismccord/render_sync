@@ -1,4 +1,4 @@
-class SyncController < ApplicationController
+class Sync::RefetchesController < ApplicationController
   
   respond_to :json
 
@@ -6,7 +6,7 @@ class SyncController < ApplicationController
   before_filter :find_resource
   before_filter :find_authorized_partial
 
-  def refetch
+  def show
     render json: {
       html: @partial.render_to_string
     }
