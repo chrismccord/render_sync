@@ -2,10 +2,7 @@ module Sync
   class RefetchPartialCreator < PartialCreator
 
     def initialize(name, resource, scoped_resource, context)
-      self.name = name
-      self.resource = Resource.new(resource)
-      self.scoped_resource = Resource.new(scoped_resource) if scoped_resource
-      self.context = context
+      super
       self.partial = RefetchPartial.new(name, self.resource.model, nil, context)
     end
 

@@ -1,6 +1,6 @@
 module Sync
   class Partial
-    attr_accessor :name, :resource, :channel, :context
+    attr_accessor :name, :resource, :context
 
     def self.all(model, context)
       resource = Resource.new(model)
@@ -13,8 +13,7 @@ module Sync
 
     def initialize(name, resource, channel, context)
       self.name = name
-      self.resource = Resource.new(resource)
-      self.channel = channel
+      self.resource = Resource.new(resource, channel)
       self.context = context
     end
 
@@ -78,11 +77,7 @@ module Sync
     end
 
     def polymorphic_path
-      if channel
-        "/#{resource.plural_name}/#{channel}"
-      else
-        resource.polymorphic_path
-      end
+      resource.polymorphic_path
     end
   end
 end

@@ -1,12 +1,15 @@
 module Sync
   class PartialCreator
-    attr_accessor :name, :resource, :scoped_resource, :context, :partial
+    attr_accessor :name, :resource, :context, :partial
 
     def initialize(name, resource, scoped_resource, context)
       self.name = name
       self.resource = Resource.new(resource)
-      self.scoped_resource = Resource.new(scoped_resource) if scoped_resource
       self.context = context
+      if scoped_resource
+        scopes = [scoped_resource].flatten
+        self.resource.parent = Resource.new(scopes.first, scopes[1..-1])
+      end
       self.partial = Partial.new(name, self.resource.model, nil, context)
     end
 
@@ -42,11 +45,7 @@ module Sync
     private
 
     def polymorphic_path
-      if scoped_resource
-        "#{scoped_resource.polymorphic_path}#{resource.polymorphic_new_path}"
-      else
-        "#{resource.polymorphic_new_path}"
-      end
+      resource.polymorphic_new_path
     end
   end
 end
