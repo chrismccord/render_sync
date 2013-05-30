@@ -95,7 +95,8 @@ class Sync.Pusher
 
 
   unsubscribeAll: ->
-    @client.unsubscribe(subscription) for subscription in @subscriptions
+    for subscription in @subscriptions
+      @client.unsubscribe(subscription) if @client.channel(subscription)?
     @subscriptions = []
 
 
