@@ -11,6 +11,7 @@ describe Sync::Reactor do
       ran_block = false
       Sync.reactor.perform { ran_block = true}
       assert Sync.reactor.running?
+      sleep 0.1
       assert ran_block
     end
   end

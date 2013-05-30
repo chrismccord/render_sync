@@ -50,6 +50,7 @@ describe "Faye" do
       end
 
       it 'should publish array of messages with single post to faye' do
+        EM.expects(:next_tick).once.returns true
         assert Sync.client.batch_publish(@messages)
       end
     end

@@ -5,7 +5,7 @@ module Sync
     # Execute EventMachine bound code block, waiting for reactor to start if
     # not yet started or reactor thread has gone away
     def perform
-      return yield if running?
+      return EM.next_tick{ yield } if running?
       cleanly_shutdown_reactor
       condition = new_cond
       Thread.new do
@@ -19,7 +19,7 @@ module Sync
       end
       synchronize do
         condition.wait_until { EM.reactor_running? }
-        yield
+        EM.next_tick { yield }
       end
     end
 
