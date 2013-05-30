@@ -39,13 +39,13 @@ module Sync
         actions.flatten!
 
         if actions.include? :create
-          after_create :publish_sync_create, if: -> { Sync::Model.enabled? }
+          after_commit :publish_sync_create, on: :create, if: -> { Sync::Model.enabled? }
         end
         if actions.include? :update
-          after_update :publish_sync_update, if: -> { Sync::Model.enabled? }
+          after_commit :publish_sync_update, on: :update, if: -> { Sync::Model.enabled? }
         end
         if actions.include? :destroy
-          after_destroy :publish_sync_destroy, if: -> { Sync::Model.enabled? }
+          after_commit :publish_sync_destroy, on: :destroy, if: -> { Sync::Model.enabled? }
         end
       end
     end
