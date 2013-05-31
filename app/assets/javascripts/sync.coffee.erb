@@ -10,7 +10,8 @@ $ = jQuery
 
   init: ->
     @adapter = new Sync[@CLIENT_ADAPTER]
-    $ => 
+    $ =>
+      return if @isReady()
       @ready = true
       @connect()
       @flushReadyQueue()
@@ -25,6 +26,8 @@ $ = jQuery
   onConnectFailure: (error) -> #noop
 
   connect: -> @adapter.connect()
+
+  isConnected: -> @adapter.isConnected()
 
   onReady: (callback) ->
     if @isReady()
@@ -71,6 +74,8 @@ class Sync.Faye
     @client = new window.Faye.Client(Sync.FAYE_HOST)
 
 
+  isConnected: -> @client?.getState() is "CONNECTED"
+
   subscribe: (channel, callback) -> 
     @subscriptions.push(@client.subscribe channel, callback)
 
@@ -87,6 +92,8 @@ class Sync.Pusher
   connect: ->
     @client = new window.Pusher(Sync.PUSHER_API_KEY)
 
+
+  isConnected: -> @client?.connection.state is "connected"
 
   subscribe: (channel, callback) -> 
     @subscriptions.push channel
