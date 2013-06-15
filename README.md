@@ -222,6 +222,48 @@ class Sync.TodoListRow extends Sync.View
 
 ```
 
+## Narrowing sync_new scope
+
+View:
+```erb
+<%= sync_new partial: 'todo_list_row', resource: Todo.new, scope: [@project, :staff] %>
+```
+
+Controller/Model:
+```ruby
+sync_new @todo, scope: [@project, :staff]
+```
+
+
+## Refetching Partials
+
+Refetching allows syncing partials across different users when the partial requires the session's context (ie. current_user). 
+
+Ex:
+    View: Add `refetch: true` to sync calls, and place partial file in a 'refetch'
+    subdirectory in the model's sync view folder:
+
+The partial file would be located in `app/views/sync/todos/refetch/_list_row.html.erb`
+```erb
+<% @project.todos.ordered.each do |todo| %>
+  <%= sync partial: 'list_row', resource: todo, refetch: true %>
+<% end %>
+<%= sync_new partial: 'list_row', resource: Todo.new, scope: @project, refetch: true %>
+```
+
+*Notes*
+
+While this approach works very well for the cases it's needed, syncing without refetching should be used unless refetching is absolutely necessary for performance reasons. For example, 
+
+A sync update request is triggered on the server for a 'regular' sync'd partial with 100 listening clients:
+- number of http requests 1
+- number of renders 1, pushed out to all 100 clients via pubsub server.
+
+
+A sync update request is triggered on the server for a 'refetch' sync'd partial with 100 listening clients:
+- number of http requests 100
+- number of renders 100, rendering each request in clients session context.
+
 ## Using with cache_digests (Russian doll caching)
 
 Sync has a custom `DependencyTracker::ERBTracker` that can handle `sync` render calls.
