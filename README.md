@@ -295,6 +295,32 @@ CacheDigests::DependencyTracker.register_tracker :erb, Sync::ERBTracker
 
 **Note:** haml support is limited, but it seems to work in most cases.
 
+
+## Serving Faye over HTTPS (with Thin)
+
+Create a thin configuration file `config/sync_thin.yml` similar to the following:
+
+```yaml
+---
+port: 4443
+ssl: true
+ssl_key_file: /path/to/server.pem
+ssl_cert_file: /path/to/certificate_chain.pem
+environment: production
+rackup: sync.ru
+```
+
+The `certificate_chain.pem` file should contain your signed certificate, followed by intermediate certificates (if any) and the root certificate of the CA that signed the key.
+
+Next reconfigure the `server` and `adapter_javascript_url` in `config/sync.yml` to look like `https://your.hostname.com:4443/faye` and `https://your.hostname.com:4443/faye/faye.js` respectively.
+
+Finally start up Thin from the project root.
+
+```
+thin -C config/sync_thin.yml start
+```
+
+
 ## Brief Example or [checkout an example application](https://github.com/chrismccord/sync_example)
 
 View `sync/users/_user_list_row.html.erb`
