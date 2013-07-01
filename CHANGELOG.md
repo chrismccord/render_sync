@@ -1,6 +1,6 @@
 # Version 0.2.3 - June 30, 2013
 
-- Fixed Turbolinks issue where page:restore events no longer evaluate scrip tags in the body. The workaround re-evaluates all sync sript tags on page restore.
+- Fixed Turbolinks issue where `page:restore` events no longer evaluate script tags in the body. The workaround re-evaluates all sync sript tags on page restore.
 
 # Version 0.2.1 - May 27, 2013
 
