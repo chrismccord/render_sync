@@ -1,3 +1,7 @@
+# Version 0.2.3 - June 30, 2013
+
+- Fixed Turbolinks issue where page:restore events no longer evaluate scrip tags in the body. The workaround re-evaluates all sync sript tags on page restore.
+
 # Version 0.2.1 - May 27, 2013
 
  - Add ability to narrow scope to custom channel for sync_new publishes
