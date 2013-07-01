@@ -21,6 +21,12 @@ $ = jQuery
   # Handle Turbolinks teardown, unsubscribe from all channels before transition
   bindUnsubscribe: ->
     document.addEventListener "page:fetch", => @adapter.unsubscribeAll()
+    document.addEventListener "page:restore", => @reexecuteScripts()
+
+
+  # Handle Turbolinks cache restore, re-eval all sync script tags
+  reexecuteScripts: ->
+    eval($(script).html()) for script in $("script[data-sync-id]")
 
 
   onConnectFailure: (error) -> #noop
