@@ -71,7 +71,7 @@ module Sync
 
     def locals
       locals_hash = {}
-      locals_hash[resource.name.to_sym] = resource.model
+      locals_hash[resource.name.split('/').last.to_sym] = resource.model
 
       locals_hash
     end
