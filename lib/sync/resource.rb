@@ -57,7 +57,7 @@ module Sync
     end
 
     def name
-      model.class.model_name.to_s.underscore.split('/').last
+      model.class.model_name.to_s.underscore
     end
 
     def plural_name
