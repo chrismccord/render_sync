@@ -1,8 +1,9 @@
+require 'eventmachine'
 require 'monitor'
-require "digest/sha1"
-require "erb"
-require "net/http"
-require "net/https"
+require 'digest/sha1'
+require 'erb'
+require 'net/http'
+require 'net/https'
 require 'sync/renderer'
 require 'sync/actions'
 require 'sync/controller_helpers'
