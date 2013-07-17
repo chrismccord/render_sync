@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = "sync"
-  s.version     = "0.2.3"
+  s.version     = "0.2.4"
   s.author      = "Chris McCord"
   s.email       = "chris@chrismccord.com"
   s.homepage    = "http://github.com/chrismccord/sync"
