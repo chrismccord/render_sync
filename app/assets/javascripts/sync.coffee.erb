@@ -20,8 +20,8 @@ $ = jQuery
 
   # Handle Turbolinks teardown, unsubscribe from all channels before transition
   bindUnsubscribe: ->
-    document.addEventListener "page:fetch", => @adapter.unsubscribeAll()
-    document.addEventListener "page:restore", => @reexecuteScripts()
+    $(document).bind "page:fetch", => @adapter.unsubscribeAll()
+    $(document).bind "page:restore", => @reexecuteScripts()
 
 
   # Handle Turbolinks cache restore, re-eval all sync script tags
