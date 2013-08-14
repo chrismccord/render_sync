@@ -30,7 +30,7 @@ module Sync
     end
 
     def message(action)
-      Sync.client.build_message channel_for_action(action), 
+      Sync.client.build_message channel_for_action(action),
         html: (render_to_string unless action.to_s == "destroy")
     end
 
@@ -71,8 +71,7 @@ module Sync
 
     def locals
       locals_hash = {}
-      locals_hash[resource.name.split('/').last.to_sym] = resource.model
-
+      locals_hash[resource.base_name.to_sym] = resource.model
       locals_hash
     end
 
