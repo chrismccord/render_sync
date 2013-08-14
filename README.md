@@ -224,16 +224,33 @@ class Sync.TodoListRow extends Sync.View
 
 ## Narrowing sync_new scope
 
+Sometimes, you do not want your page to update with every new record. With the `scope` option, you can limit what is being updated on a given page.
+
+One way of using `scope` is by supplying a String or a Symbol. This is useful for example when you want to only show new records for a given locale:
+
 View:
 ```erb
-<%= sync_new partial: 'todo_list_row', resource: Todo.new, scope: [@project, :staff] %>
+<%= sync_new partial: 'todo_list_row', resource: Todo.new, scope: I18n.locale %>
 ```
 
 Controller/Model:
 ```ruby
-sync_new @todo, scope: [@project, :staff]
+sync_new @todo, scope: @todo.locale
 ```
 
+Another use of `scope` is with a parent resource. This way you can for example update a project page with new todos for this single project:
+
+View:
+```erb
+<%= sync_new partial: 'todo_list_row', resource: Todo.new, scope: @project %>
+```
+
+Controller/Model:
+```ruby
+sync_new @todo, scope: @project
+```
+
+Both approaches can be combined. Just supply an Array of Strings/Symbols and/or parent resources to the `scope` option. Note that the order of elements matters. Be sure to use the same order in your view and in your controller/model.
 
 ## Refetching Partials
 
