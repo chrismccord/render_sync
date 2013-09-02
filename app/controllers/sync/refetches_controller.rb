@@ -1,5 +1,5 @@
 class Sync::RefetchesController < ApplicationController
-  
+
   respond_to :json
 
   before_filter :require_valid_request
@@ -8,17 +8,25 @@ class Sync::RefetchesController < ApplicationController
 
   def show
     render json: {
-      html: @partial.render_to_string
+      html: with_format(:html){ @partial.render_to_string }
     }
   end
- 
+
 
   private
+
+  def with_format(format, &block)
+      old_formats = formats
+      self.formats = [format]
+      block_value = block.call
+      self.formats = old_formats
+      return block_value
+  end
 
   def require_valid_request
     render_bad_request unless request_valid?
   end
-  
+
   def request_valid?
     [
       params[:resource_name], 
