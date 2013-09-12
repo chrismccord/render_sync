@@ -16,11 +16,12 @@ class Sync::RefetchesController < ApplicationController
   private
 
   def with_format(format, &block)
-      old_formats = formats
-      self.formats = [format]
-      block_value = block.call
-      self.formats = old_formats
-      return block_value
+    old_formats = formats
+    self.formats = [format]
+    block_value = block.call
+    self.formats = old_formats
+
+    block_value
   end
 
   def require_valid_request
@@ -29,7 +30,7 @@ class Sync::RefetchesController < ApplicationController
 
   def request_valid?
     [
-      params[:resource_name], 
+      params[:resource_name],
       params[:partial_name],
       params[:auth_token]
     ].all?(&:present?)
@@ -37,16 +38,16 @@ class Sync::RefetchesController < ApplicationController
 
   def find_resource
     @resource = Sync::RefetchModel.find_by_class_name_and_id(
-      params[:resource_name], 
+      params[:resource_name],
       params[:resource_id]
     ) || render_bad_request
   end
 
   def find_authorized_partial
     @partial = Sync::RefetchPartial.find_by_authorized_resource(
-      @resource, 
-      params[:partial_name], 
-      self, 
+      @resource,
+      params[:partial_name],
+      self,
       params[:auth_token]
     ) || render_bad_request
   end
