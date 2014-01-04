@@ -11,6 +11,7 @@ $ = jQuery
   init: ->
     @adapter = new Sync[@CLIENT_ADAPTER]
     $ =>
+      return unless window["<%= Sync.adapter %>"]?
       return if @isReady()
       @ready = true
       @connect()
