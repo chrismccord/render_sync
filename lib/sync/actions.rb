@@ -23,18 +23,6 @@ module Sync
       sync resource, :destroy, options
     end
 
-    # Render all sync'd partials for resource to string and publish 
-    # new action to pubsub server with rendered resource messages
-    #
-    # resource - The ActiveModel resource, or Array of ActiveModel resources
-    # action - The Symbol action to publish. One of :update, :destroy
-    # options - The Hash of options
-    #   scope - The ActiveModel resource to scope destroy channel to
-    #   
-    def sync_new(resource, options = {})
-      sync_new resource, options
-    end
-
     # Render all resource sync'd partial to string and publish action
     # to pubsub server with rendered resource messages
     #
