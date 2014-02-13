@@ -88,6 +88,7 @@ module Sync
     # Returns the Pathname for this scope
     # Example:
     #   class User < ActiveRecord::Base
+    #     sync :all
     #     belongs_to :group
     #     sync_scope :in_group, ->(group) { where(group_id: group.id) }
     #   end

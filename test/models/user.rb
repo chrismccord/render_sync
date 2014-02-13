@@ -11,3 +11,14 @@ class User < ActiveRecord::Base
   sync_scope :with_group_id, ->(group_id) { where(group_id: group_id)}
   sync_scope :with_min_age_in_group, ->(age, group_id) { where(group_id: group_id).where(["age >= ?", age])}
 end
+
+class UserWithoutScopes < ActiveRecord::Base
+  self.table_name = :users
+  sync :all
+end
+
+class UserWithOneScope < ActiveRecord::Base
+  self.table_name = :users
+  sync :all
+  sync_scope :old, -> { where(age: 90) }
+end

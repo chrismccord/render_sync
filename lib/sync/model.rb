@@ -29,9 +29,13 @@ module Sync
     module ClassMethods
       attr_accessor :sync_default_scope, :sync_scope_definitions
 
+      # Set up automatic syncing of partials when creating, deleting and update of records
+      #
       def sync(*actions)
-        include Sync::Actions
         include ModelActions
+        
+        #attr_accessor :sync_actions
+        
         if actions.last.is_a? Hash
           @sync_default_scope = actions.last.fetch :scope
         end
@@ -40,15 +44,23 @@ module Sync
         actions.flatten!
 
         if actions.include? :create
-          after_commit :publish_sync_create, on: :create, if: -> { Sync::Model.enabled? }
+          before_create  :prepare_sync_actions,               if: -> { Sync::Model.enabled? }
+          after_create   :prepare_sync_create, on: :create,   if: -> { Sync::Model.enabled? }
         end
+        
         if actions.include? :update
-          before_update :store_state_before_update, on: :update, if: -> { Sync::Model.enabled? }
-          after_commit :publish_sync_update, on: :update, if: -> { Sync::Model.enabled? }
+          before_update  :prepare_sync_actions,               if: -> { Sync::Model.enabled? }
+          before_update  :store_state_before_update,          if: -> { Sync::Model.enabled? }
+          after_update   :prepare_sync_update, on: :update,   if: -> { Sync::Model.enabled? }
         end
+        
         if actions.include? :destroy
-          after_commit :publish_sync_destroy, on: :destroy, if: -> { Sync::Model.enabled? }
+          before_destroy :prepare_sync_actions,               if: -> { Sync::Model.enabled? }
+          after_destroy   :prepare_sync_destroy, on: :destroy, if: -> { Sync::Model.enabled? }
         end
+
+        after_commit :publish_sync_actions,                   if: -> { Sync::Model.enabled? }
+
       end
 
       # Set up a sync scope for the model defining a set of records to be updated via sync
@@ -126,37 +138,46 @@ module Sync
         return nil unless self.class.sync_default_scope
         send self.class.sync_default_scope
       end
+      
+      def sync_actions
+        @sync_actions
+      end
 
       def sync_render_context
         Sync::Model.context || super
       end
+      
+      def prepare_sync_actions
+        @sync_actions = []
+      end
 
-      def publish_sync_create
-        sync_new self, scope: sync_default_scope
-        sync_update sync_default_scope.reload if sync_default_scope
+      def prepare_sync_create
+        @sync_actions.push Action.new(self, :new, scope: sync_default_scope)
+        @sync_actions.push Action.new(sync_default_scope.reload, :update) if sync_default_scope
         
         sync_scope_definitions.each do |definition|
-          sync_new self, scope: Sync::Scope.new_from_model(definition, self), default_scope: sync_default_scope
+          @sync_actions.push Action.new(self, :new, scope: Sync::Scope.new_from_model(definition, self), default_scope: sync_default_scope)
         end
       end
 
-      def publish_sync_update        
+      def prepare_sync_update
         if sync_default_scope
-          sync_update [self, sync_default_scope.reload]
+          @sync_actions.push Action.new([self, sync_default_scope.reload], :update)
         else
-          sync_update self
+          @sync_actions.push Action.new(self, :update)
         end
 
         sync_scope_definitions.each do |definition|
-          publish_sync_update_scope(definition)
+          prepare_sync_update_scope(definition)
         end
       end
 
-      def publish_sync_destroy        
-        sync_destroy self
-        sync_update sync_default_scope.reload if sync_default_scope
+      def prepare_sync_destroy        
+        @sync_actions.push Action.new(self, :destroy)
+        @sync_actions.push Action.new(sync_default_scope.reload, :update) if sync_default_scope
+        
         sync_scope_definitions.each do |definition|
-          sync_destroy self, scope: Sync::Scope.new_from_model(definition, self), default_scope: sync_default_scope
+          @sync_actions.push Action.new(self, :destroy, scope: Sync::Scope.new_from_model(definition, self), default_scope: sync_default_scope)
         end
       end
 
@@ -170,34 +191,39 @@ module Sync
       # new partial to the subscribers of that scope. It also sends a destroy action
       # to subscribers of the scope, if the record has been removed from it.
       #
-      def publish_sync_update_scope(definition)
-        scope_before_update = @scopes_before_update[definition.name][:scope]
-        scope_after_update = Sync::Scope.new_from_model(definition, self)
-        
+      def prepare_sync_update_scope(definition)
         record_before_update = @record_before_update
         record_after_update = self
+
+        scope_before_update = @scopes_before_update[definition.name][:scope]
+        scope_after_update = Sync::Scope.new_from_model(definition, record_after_update)
 
         old_record_in_old_scope = @scopes_before_update[definition.name][:contains_record]
         old_record_in_new_scope = scope_after_update.contains?(record_before_update)
 
-        new_record_in_new_scope = scope_after_update.contains?(self)
+        new_record_in_new_scope = scope_after_update.contains?(record_after_update)
         new_record_in_old_scope = scope_before_update.contains?(record_after_update)
 
         # Update/Destroy existing partials of listeners on the scope before the update
         if scope_before_update.valid?
           if old_record_in_old_scope && !new_record_in_old_scope
-            sync_destroy record_before_update, scope: scope_before_update, default_scope: sync_default_scope
+            @sync_actions.push Action.new(record_before_update, :destroy, scope: scope_before_update, default_scope: sync_default_scope)
           elsif old_record_in_new_scope
-            sync_update record_after_update, scope: scope_before_update, default_scope: sync_default_scope
+            @sync_actions.push Action.new(record_after_update, :update, scope: scope_before_update, default_scope: sync_default_scope)
           end
         end
 
         # Publish new partials to listeners on this new (changed) scope
         if scope_after_update.valid?
           if new_record_in_new_scope && !new_record_in_old_scope
-            sync_new record_after_update, scope: scope_after_update, default_scope: sync_default_scope
+            @sync_actions.push Action.new(record_after_update, :new, scope: scope_after_update, default_scope: sync_default_scope)
           end
         end
+      end
+      
+      def publish_sync_actions
+        logger.debug "Performing #{@sync_actions.size} Actions"
+        @sync_actions.each(&:perform)
       end
       
       def sync_scope_definitions
@@ -223,7 +249,7 @@ module Sync
             scope: scope, 
             contains_record: scope.contains?(record) 
           }
-        end        
+        end
       end
 
       

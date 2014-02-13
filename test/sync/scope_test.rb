@@ -1,10 +1,10 @@
 require 'rails/all'
 require_relative '../test_helper'
 require_relative 'abstract_controller'
-require_relative 'user'
-require_relative 'project'
-require_relative 'group'
-require_relative 'todo'
+require_relative '../models/user'
+require_relative '../models/project'
+require_relative '../models/group'
+require_relative '../models/todo'
 
 describe Sync::Scope do
   include TestHelper

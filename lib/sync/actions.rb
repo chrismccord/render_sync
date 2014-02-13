@@ -1,5 +1,4 @@
 module Sync
-
   module Actions
 
     # Render all sync'd partials for resource to string and publish update action
@@ -44,7 +43,7 @@ module Sync
     #           the channel to. Will be concatenated to an optional default_scope
     #
     def sync(resource, action, options = {})
-      scope = get_scope_from_options(options)
+      scope = options[:scope]
       resources = [resource].flatten
       messages = resources.collect do |resource|
         all_partials(resource, sync_render_context, scope).collect do |partial|
@@ -68,26 +67,19 @@ module Sync
     #           default_scope
     #
     def sync_new(resource, options = {})
-      scope = get_scope_from_options(options)
+      scope = options[:scope]
       resources = [resource].flatten
       messages = resources.collect do |resource|
         all_partials(resource, sync_render_context, scope).collect do |partial|
-          creator = partial.creator_for_scope(scope).message
-          creator
+          creator = partial.creator_for_scope(scope)
+          creator.message
         end
       end
 
       Sync.client.batch_publish(messages.flatten)
     end
 
-
     private
-
-    # Merge default_scope and scope from options Hash
-    # compact array to remove nil elements
-    def get_scope_from_options(options)
-      [options[:default_scope], options[:scope]].compact
-    end
 
     # The Context class handling partial rendering
     def sync_render_context
