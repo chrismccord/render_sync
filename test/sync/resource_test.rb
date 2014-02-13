@@ -3,12 +3,14 @@ require_relative '../test_helper'
 require_relative 'abstract_controller'
 require_relative 'user'
 require_relative 'project'
+require_relative 'group'
 
 describe Sync::Partial do
   include TestHelper
 
   before do
-    @user = User.new
+    @user = User.create
+    @group = Group.create 
     @project = Project.new
   end
 
@@ -98,12 +100,41 @@ describe Sync::Partial do
       end
     end
 
-    describe 'a resource with mixed scopes' do
-      it 'returns the path for the model, prefixed by all scopes' do
-        child = Sync::Resource.new(@user, [:en, :admin, @project])
-        assert_equal "/en/admin/projects/1/users/1", child.polymorphic_path.to_s
+    describe 'a resource with an Sync::Scope object as scope' do
+      it 'returns the path for the model, prefixed by sync_scope path' do
+        child = Sync::Resource.new(@user, User.cool)
+        assert_equal "/cool/users/1", child.polymorphic_path.to_s
       end
     end
+
+    describe 'a resource with an Sync::Scope object with AR-param as scope' do
+      it 'returns the path for the model, prefixed by sync_scope path' do
+        child = Sync::Resource.new(@user, User.in_group(@group))
+        assert_equal "/in_group/group/1/users/1", child.polymorphic_path.to_s
+      end
+    end
+
+    describe 'a resource with an Sync::Scope object with Integer-param as scope' do
+      it 'returns the path for the model, prefixed by sync_scope path' do
+        child = Sync::Resource.new(@user, User.with_group_id(@group.id))
+        assert_equal "/with_group_id/group_id/1/users/1", child.polymorphic_path.to_s
+      end
+    end
+
+    describe 'a resource with an Sync::Scope object with multiple params as scope' do
+      it 'returns the path for the model, prefixed by sync_scope path' do
+        child = Sync::Resource.new(@user, User.with_min_age_in_group(15, @group.id))
+        assert_equal "/with_min_age_in_group/age/15/group_id/1/users/1", child.polymorphic_path.to_s
+      end
+    end
+
+    describe 'a resource with mixed scopes' do
+      it 'returns the path for the model, prefixed by all scopes' do
+        child = Sync::Resource.new(@user, [:en, :admin, @project, User.cool, User.in_group(@group)])
+        assert_equal "/en/admin/projects/1/cool/in_group/group/1/users/1", child.polymorphic_path.to_s
+      end
+    end
+
   end
 
   describe '#polymorphic_new_path' do
@@ -127,10 +158,17 @@ describe Sync::Partial do
       end
     end
 
+    describe 'a resource with a Sync::Scope object as scope' do
+      it 'returns the path for the model, prefixed by parent path' do
+        child = Sync::Resource.new(@user, User.cool)
+        assert_equal "/cool/users/new", child.polymorphic_new_path.to_s
+      end
+    end
+
     describe 'a resource with mixed scopes' do
       it 'returns the path for the model, prefixed by all scopes' do
-        child = Sync::Resource.new(@user, [:en, :admin, @project])
-        assert_equal "/en/admin/projects/1/users/new", child.polymorphic_new_path.to_s
+        child = Sync::Resource.new(@user, [:en, :admin, @project, User.cool, User.in_group(@group)])
+        assert_equal "/en/admin/projects/1/cool/in_group/group/1/users/new", child.polymorphic_new_path.to_s
       end
     end
   end

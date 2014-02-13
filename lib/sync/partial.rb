@@ -2,18 +2,18 @@ module Sync
   class Partial
     attr_accessor :name, :resource, :context
 
-    def self.all(model, context)
-      resource = Resource.new(model)
+    def self.all(model, context, scope = nil)
+      resource = Resource.new(model, scope)
 
       Dir["app/views/sync/#{resource.plural_name}/_*.*"].map do |partial|
         partial_name = File.basename(partial)
-        Partial.new(partial_name[1...partial_name.index('.')], resource.model, nil, context)
+        Partial.new(partial_name[1...partial_name.index('.')], resource.model, scope, context)
       end
     end
 
-    def initialize(name, resource, channel, context)
+    def initialize(name, resource, scope, context)
       self.name = name
-      self.resource = Resource.new(resource, channel)
+      self.resource = Resource.new(resource, scope)
       self.context = context
     end
 
@@ -63,7 +63,7 @@ module Sync
     end
 
 
-    private
+    #private
 
     def path
       "sync/#{resource.plural_name}/#{name}"

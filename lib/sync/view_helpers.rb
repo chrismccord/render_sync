@@ -16,17 +16,17 @@ module Sync
     #   <%= sync partial: 'todo', collection: todos %>
     #
     def sync(options = {})
-      channel      = options[:channel]
-      partial_name = options.fetch(:partial, channel)
       collection   = options[:collection] || [options.fetch(:resource)]
+      scope        = options[:channel] || options[:scope] || (collection.is_a?(Sync::Scope) ? collection : nil)
+      partial_name = options.fetch(:partial, scope)
       refetch      = options.fetch(:refetch, false)
 
       results = []
       collection.each do |resource|
         if refetch
-          partial = RefetchPartial.new(partial_name, resource, channel, self)
+          partial = RefetchPartial.new(partial_name, resource, scope, self)
         else
-          partial = Partial.new(partial_name, resource, channel, self)
+          partial = Partial.new(partial_name, resource, scope, self)
         end
         results << "
           <script type='text/javascript' data-sync-id='#{partial.selector_start}'>
@@ -76,10 +76,10 @@ module Sync
     #  
     def sync_new(options = {})
       partial_name = options.fetch(:partial)
-      resource     = options.fetch(:resource)
       scope        = options[:scope]
       direction    = options.fetch :direction, 'append'
       refetch      = options.fetch(:refetch, false)
+      resource     = scope.is_a?(Sync::Scope) ? scope.new : options.fetch(:resource)
 
       if refetch
         creator = RefetchPartialCreator.new(partial_name, resource, scope, self)

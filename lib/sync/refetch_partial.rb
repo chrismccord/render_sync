@@ -1,12 +1,12 @@
 module Sync
   class RefetchPartial < Partial
 
-    def self.all(model, context)
+    def self.all(model, context, scope = nil)
       resource = Resource.new(model)
 
       Dir["app/views/sync/#{resource.plural_name}/refetch/_*.*"].map do |partial|
         partial_name = File.basename(partial)
-        RefetchPartial.new(partial_name[1...partial_name.index('.')], resource.model, nil, context)
+        RefetchPartial.new(partial_name[1...partial_name.index('.')], resource.model, scope, context)
       end
     end
 

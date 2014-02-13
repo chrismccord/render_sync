@@ -51,8 +51,8 @@ describe Sync::Model do
     end
   end
 
-  it 'does not have a sync scope if it is not specified' do
-    assert model.sync_scope.nil?
+  it 'does not have a sync default scope if it is not specified' do
+    assert model.sync_default_scope.nil?
   end
 
   it 'does not sync if sync is not enabled' do
@@ -77,7 +77,7 @@ describe Sync::Model do
     model.stubs(:my_scope).returns(scope)
     scope.stubs(:reload).returns(scope)
 
-    assert_equal scope, model.sync_scope
+    assert_equal scope, model.sync_default_scope
 
     Sync::Model.enable do
       model.expects(:sync_new).with(model, scope: scope)
