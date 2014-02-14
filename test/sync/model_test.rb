@@ -26,30 +26,139 @@ describe Sync::Model do
     refute Sync::Model.enabled?
   end
 
-  describe 'syncing' do
-    it 'publishes new record to main channel' do
+  describe 'syncing of model changes to all listening channels' do
+    it 'publishes record (create/update/destroy) to main new channel' do
       Sync::Model.enable do
         user = UserWithoutScopes.new
+        
+        # Create
         user.save!
         assert user.persisted?
         assert_equal 1, user.sync_actions.size
-        assert_equal [:new], user.sync_actions.map(&:name).uniq
-
-        user.update_attributes!(name: "Stefan")
+        
+        assert_equal :new, user.sync_actions[0].name
+        assert_equal "/user_without_scopes/#{user.id}", user.sync_actions[0].test_path
+      
+        # Update
+        user.update_attributes!(name: "Foo")
         assert user.persisted?
         assert_equal 1, user.sync_actions.size
-        assert_equal [:update], user.sync_actions.map(&:name).uniq
+        
+        assert_equal :update, user.sync_actions[0].name
+        assert_equal "/user_without_scopes/#{user.id}", user.sync_actions[0].test_path
+        
+        # Destroy
+        user.destroy
+        assert user.destroyed?
+        assert_equal 1, user.sync_actions.size
+        
+        assert_equal :destroy, user.sync_actions[0].name
+        assert_equal "/user_without_scopes/#{user.id}", user.sync_actions[0].test_path
       end
     end
 
-    it 'publishes new record with scopes to main channel and scope channels' do
+    it 'publishes record with default scope to scope channel and parent channel' do
       Sync::Model.enable do
-        user = UserWithOneScope.new
+        
+        # Create
+        group = Group.create!
+        user = UserWithDefaultScope.new(group: group)
+        user.save!
+        
+        assert user.persisted?
+        assert_equal 2, user.sync_actions.size
+        
+        assert_equal :new, user.sync_actions[0].name
+        assert_equal "/groups/1/user_with_default_scopes/#{user.id}", user.sync_actions[0].test_path
+
+        assert_equal :update, user.sync_actions[1].name
+        assert_equal "/groups/1", user.sync_actions[1].test_path
+
+        # Update
+        user.update_attributes!(name: "Foo")
+        
+        assert user.persisted?
+        assert_equal 1, user.sync_actions.size
+        
+        assert_equal :update, user.sync_actions[0].name
+        assert_equal "/groups/1/user_with_default_scopes/#{user.id}", user.sync_actions[0].test_path
+
+        # Destroy
+        user.destroy
+        
+        assert user.destroyed?
+        assert_equal 2, user.sync_actions.size
+        
+        assert_equal :destroy, user.sync_actions[0].name
+        assert_equal "/groups/1/user_with_default_scopes/#{user.id}", user.sync_actions[0].test_path
+
+        assert_equal :update, user.sync_actions[1].name
+        assert_equal "/groups/1", user.sync_actions[1].test_path
+
+      end
+    end
+
+    it 'publishes record with simple named sync scope' do
+      Sync::Model.enable do
+        
+        # Create user not in scope (age > 90)
+        user = UserWithSimpleScope.new(age: 85)
+        user.save!
+        assert_equal 1, user.sync_actions.size
+        
+        assert_equal :new, user.sync_actions[0].name
+        assert_equal "/user_with_simple_scopes/#{user.id}", user.sync_actions[0].test_path
+
+        # Create user which in scope old (age >= 90)
+        user = UserWithSimpleScope.new(age: 95)
         user.save!
         assert_equal 2, user.sync_actions.size
-        assert_equal [:new], user.sync_actions.map(&:name).uniq
+        
+        assert_equal :new, user.sync_actions[0].name
+        assert_equal "/user_with_simple_scopes/#{user.id}", user.sync_actions[0].test_path
+
+        assert_equal :new, user.sync_actions[1].name
+        assert_equal "/old/user_with_simple_scopes/#{user.id}", user.sync_actions[1].test_path
+        
+        # Update of independent attribute name
+        user.update_attributes!(name: "Foo")
+        assert !user.changed?
+        assert_equal 2, user.sync_actions.size
+        
+        assert_equal :update, user.sync_actions[0].name
+        assert_equal "/user_with_simple_scopes/#{user.id}", user.sync_actions[0].test_path
+
+        assert_equal :update, user.sync_actions[1].name
+        assert_equal "/old/user_with_simple_scopes/#{user.id}", user.sync_actions[1].test_path
+
+        # Update of dependent attribute age, so that the record no longer falls into the scope
+        # and has to be destroyed on that channel
+        user.update_attributes!(age: 80)
+        assert !user.changed?
+        assert_equal 2, user.sync_actions.size
+        
+        assert_equal :update, user.sync_actions[0].name
+        assert_equal "/user_with_simple_scopes/#{user.id}", user.sync_actions[0].test_path
+
+        assert_equal :destroy, user.sync_actions[1].name
+        assert_equal "/old/user_with_simple_scopes/#{user.id}", user.sync_actions[1].test_path
+
+        # Update of dependent attribute age, so that the record will fall into the scope
+        # and has to be destroyed on that channel
+        user.update_attributes(age: 100)
+        
+        assert !user.changed?
+        assert_equal 2, user.sync_actions.size
+        
+        assert_equal :update, user.sync_actions[0].name
+        assert_equal "/user_with_simple_scopes/#{user.id}", user.sync_actions[0].test_path
+
+        assert_equal :new, user.sync_actions[1].name
+        assert_equal "/old/user_with_simple_scopes/#{user.id}", user.sync_actions[1].test_path
+        
       end
     end
+    
   end
 
   it 'does not have a sync default scope if it is not specified' do
@@ -58,7 +167,7 @@ describe Sync::Model do
   end
 
   it 'does not sync if sync is not enabled' do
-    user = UserWithOneScope.new name: "Foo"
+    user = UserWithSimpleScope.new name: "Foo"
     user.stubs(:publish_actions)
     
     user.expects(:publish_actions).never

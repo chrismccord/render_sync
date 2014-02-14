@@ -14,11 +14,34 @@ end
 
 class UserWithoutScopes < ActiveRecord::Base
   self.table_name = :users
+
+  def id
+    1
+  end
+  
   sync :all
 end
 
-class UserWithOneScope < ActiveRecord::Base
+class UserWithDefaultScope < ActiveRecord::Base
   self.table_name = :users
-  sync :all
-  sync_scope :old, -> { where(age: 90) }
+  belongs_to :group
+  
+  sync :all, scope: :group
 end
+
+class UserWithSimpleScope < ActiveRecord::Base
+  self.table_name = :users
+
+  sync :all
+  sync_scope :old, -> { where(["users.age >= ?", 90]) }
+end
+
+class UserWithAdvancedScope < ActiveRecord::Base
+  self.table_name = :users
+  belongs_to :group
+  
+  sync :all
+  sync_scope :in_group, ->(group) { where(group_id: group.id) }  
+end
+
+
