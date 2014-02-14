@@ -110,28 +110,28 @@ describe Sync::Partial do
     describe 'a resource with an Sync::Scope object with AR-param as scope' do
       it 'returns the path for the model, prefixed by sync_scope path' do
         child = Sync::Resource.new(@user, User.in_group(@group))
-        assert_equal "/in_group/group/1/users/1", child.polymorphic_path.to_s
+        assert_equal "/in_group/group/#{@group.id}/users/1", child.polymorphic_path.to_s
       end
     end
 
     describe 'a resource with an Sync::Scope object with Integer-param as scope' do
       it 'returns the path for the model, prefixed by sync_scope path' do
         child = Sync::Resource.new(@user, User.with_group_id(@group.id))
-        assert_equal "/with_group_id/group_id/1/users/1", child.polymorphic_path.to_s
+        assert_equal "/with_group_id/group_id/#{@group.id}/users/1", child.polymorphic_path.to_s
       end
     end
 
     describe 'a resource with an Sync::Scope object with multiple params as scope' do
       it 'returns the path for the model, prefixed by sync_scope path' do
         child = Sync::Resource.new(@user, User.with_min_age_in_group(15, @group.id))
-        assert_equal "/with_min_age_in_group/age/15/group_id/1/users/1", child.polymorphic_path.to_s
+        assert_equal "/with_min_age_in_group/age/15/group_id/#{@group.id}/users/1", child.polymorphic_path.to_s
       end
     end
 
     describe 'a resource with mixed scopes' do
       it 'returns the path for the model, prefixed by all scopes' do
         child = Sync::Resource.new(@user, [:en, :admin, @project, User.cool, User.in_group(@group)])
-        assert_equal "/en/admin/projects/1/cool/in_group/group/1/users/1", child.polymorphic_path.to_s
+        assert_equal "/en/admin/projects/1/cool/in_group/group/#{@group.id}/users/1", child.polymorphic_path.to_s
       end
     end
   end
@@ -174,7 +174,7 @@ describe Sync::Partial do
     describe 'a resource with mixed scopes' do
       it 'returns the path for the model, prefixed by all scopes' do
         child = Sync::Resource.new(@user, [:en, :admin, @project, User.cool, User.in_group(@group)])
-        assert_equal "/en/admin/projects/1/cool/in_group/group/1/users/new", child.polymorphic_new_path.to_s
+        assert_equal "/en/admin/projects/1/cool/in_group/group/#{@group.id}/users/new", child.polymorphic_new_path.to_s
       end
     end
   end

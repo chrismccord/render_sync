@@ -69,10 +69,10 @@ describe Sync::Model do
         assert_equal 2, user.sync_actions.size
         
         assert_equal :new, user.sync_actions[0].name
-        assert_equal "/groups/1/user_with_default_scopes/#{user.id}", user.sync_actions[0].test_path
+        assert_equal "/groups/#{group.id}/user_with_default_scopes/#{user.id}", user.sync_actions[0].test_path
 
         assert_equal :update, user.sync_actions[1].name
-        assert_equal "/groups/1", user.sync_actions[1].test_path
+        assert_equal "/groups/#{group.id}", user.sync_actions[1].test_path
 
         # Update
         user.update_attributes!(name: "Foo")
@@ -81,7 +81,7 @@ describe Sync::Model do
         assert_equal 1, user.sync_actions.size
         
         assert_equal :update, user.sync_actions[0].name
-        assert_equal "/groups/1/user_with_default_scopes/#{user.id}", user.sync_actions[0].test_path
+        assert_equal "/groups/#{group.id}/user_with_default_scopes/#{user.id}", user.sync_actions[0].test_path
 
         # Destroy
         user.destroy
@@ -90,10 +90,10 @@ describe Sync::Model do
         assert_equal 2, user.sync_actions.size
         
         assert_equal :destroy, user.sync_actions[0].name
-        assert_equal "/groups/1/user_with_default_scopes/#{user.id}", user.sync_actions[0].test_path
+        assert_equal "/groups/#{group.id}/user_with_default_scopes/#{user.id}", user.sync_actions[0].test_path
 
         assert_equal :update, user.sync_actions[1].name
-        assert_equal "/groups/1", user.sync_actions[1].test_path
+        assert_equal "/groups/#{group.id}", user.sync_actions[1].test_path
 
       end
     end
