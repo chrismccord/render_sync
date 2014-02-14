@@ -31,7 +31,7 @@ end
 module Sync
 
   class << self
-    attr_accessor :config, :client
+    attr_accessor :config, :client, :logger
 
     def config
       @config || {}
@@ -48,12 +48,17 @@ module Sync
       yaml = YAML.load(ERB.new(File.read(filename)).result)[environment.to_s]
       raise ArgumentError, "The #{environment} environment does not exist in #{filename}" if yaml.nil?
       yaml.each{|key, value| config[key.to_sym] = value }
+      setup_logger
       setup_client
     end
 
     def setup_client
       @client = Sync::Clients.const_get(adapter).new
       @client.setup
+    end
+
+    def setup_logger
+      @logger = (defined?(Rails) && Rails.logger) ? Rails.logger : Logger.new(STDOUT)
     end
 
     def async?
