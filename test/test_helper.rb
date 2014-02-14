@@ -35,7 +35,7 @@ module TestHelper
       File.expand_path("../fixtures/sync_faye.yml", __FILE__),
       "test"
     )
-    Sync.logger.level = 1
+    Sync.logger.level = ENV['LOGLEVEL'].present? ? ENV['LOGLEVEL'].to_i : 1
   end
 end
 
@@ -46,7 +46,7 @@ module TestHelperFaye
       File.expand_path("../fixtures/sync_faye.yml", __FILE__),
       "test"
     )
-    Sync.logger.level = 1
+    Sync.logger.level = ENV['LOGLEVEL'].present? ? ENV['LOGLEVEL'].to_i : 1
   end
 end
 
@@ -57,7 +57,7 @@ module TestHelperPusher
       File.expand_path("../fixtures/sync_pusher.yml", __FILE__),
       "test"
     )
-    Sync.logger.level = 1
+    Sync.logger.level = ENV['LOGLEVEL'].present? ? ENV['LOGLEVEL'].to_i : 1
   end
 end
 
