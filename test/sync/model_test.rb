@@ -156,6 +156,62 @@ describe Sync::Model do
         assert_equal :new, user.sync_actions[1].name
         assert_equal "/old/user_with_simple_scopes/#{user.id}", user.sync_actions[1].test_path
         
+        # Destroy user currently in scoped by 'old'
+        user.destroy
+        
+        assert user.destroyed?
+        assert_equal 2, user.sync_actions.size
+        
+        assert_equal :destroy, user.sync_actions[0].name
+        assert_equal "/user_with_simple_scopes/#{user.id}", user.sync_actions[0].test_path
+
+        assert_equal :destroy, user.sync_actions[1].name
+        assert_equal "/old/user_with_simple_scopes/#{user.id}", user.sync_actions[1].test_path
+        
+      end
+    end
+    
+    it 'publishes record with a named sync scope that takes arguments' do
+      Sync::Model.enable do
+
+        # Create user not in scope 'in_group'
+        group1 = Group.create
+        group2 = Group.create
+        user = UserWithAdvancedScope.create!
+
+        assert user.persisted?
+        assert_equal 1, user.sync_actions.size        
+        
+        assert_equal :new, user.sync_actions[0].name
+        assert_equal "/user_with_advanced_scopes/#{user.id}", user.sync_actions[0].test_path
+
+        # Create user in scope 'in_group'
+        user = UserWithAdvancedScope.create!(group: group1)
+
+        assert user.persisted?
+        assert_equal 2, user.sync_actions.size        
+        
+        assert_equal :new, user.sync_actions[0].name
+        assert_equal "/user_with_advanced_scopes/#{user.id}", user.sync_actions[0].test_path
+
+        assert_equal :new, user.sync_actions[1].name
+        assert_equal "/in_group/group/#{group1.id}/user_with_advanced_scopes/#{user.id}", user.sync_actions[1].test_path
+
+        # Change group
+        user.update_attributes(group: group2)
+        
+        assert user.persisted?
+        assert_equal 3, user.sync_actions.size        
+        
+        assert_equal :update, user.sync_actions[0].name
+        assert_equal "/user_with_advanced_scopes/#{user.id}", user.sync_actions[0].test_path
+
+        assert_equal :destroy, user.sync_actions[1].name
+        assert_equal "/in_group/group/#{group1.id}/user_with_advanced_scopes/#{user.id}", user.sync_actions[1].test_path
+
+        assert_equal :new, user.sync_actions[2].name
+        assert_equal "/in_group/group/#{group2.id}/user_with_advanced_scopes/#{user.id}", user.sync_actions[2].test_path
+
       end
     end
     
@@ -174,32 +230,4 @@ describe Sync::Model do
     user.save!
   end
 
-  class FakeModelWithParent < ActiveRecord::Base
-    self.table_name = 'todos'
-    sync :all, scope: :my_scope
-  end
-
-  it 'can have a scope specified when mixed into the model' do
-    # model = FakeModelWithParent.new
-    # scope = FakeModel.new
-    # model.stubs(:sync_new)
-    # model.stubs(:sync_update)
-    # model.stubs(:sync_destroy)
-    # model.stubs(:my_scope).returns(scope)
-    # scope.stubs(:reload).returns(scope)
-    # 
-    # assert_equal scope, model.sync_default_scope
-    # 
-    # Sync::Model.enable do
-    #   model.expects(:sync_new).with(model, scope: scope)
-    #   model.save!
-    # 
-    #   model.expects(:sync_update).with([model, scope])
-    #   model.save!
-    # 
-    #   model.expects(:sync_destroy).with(model)
-    #   model.expects(:sync_update).with(scope)
-    #   model.destroy
-    # end
-  end
 end
