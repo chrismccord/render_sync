@@ -91,14 +91,20 @@ module Sync
       #
       # To subscribe to these scopes you would put these lines into your views:
       #
-      #   <%= sync partial: "todo", Todo.complete, scope: Todo.complete %>
-      #   <%= sync_new partial: "todo", Todo.new, scope: Todo.complete %>
+      #   <%= sync partial: "todo", collection: @todos, scope: Todo.complete %>
       #
-      # Or for my_incomplete_todos:
+      # If the collection you want to render is exactly defined be the given scope
+      # the scope can be omitted:
       #
-      #   <%= sync partial: "todo", Todo.my_incomplete_todos(current_user), 
-      #            scope: Todo.my_incomplete_todos(current_user) %>
-      #   <%= sync_new partial: "todo", Todo.new, scope: Todo.my_incomplete_todos(current_user) %>
+      #   <%= sync partial: "todo", collection: Todo.complete %>
+      #
+      # For rendering my_incomplete_todos:
+      #
+      #   <%= sync partial: "todo", collection: Todo.my_incomplete_todos(current_user) %>
+      #
+      # The render_new call has to look like this:
+      #
+      #   <%= sync_new partial: "todo", resource: Todo.new, scope: Todo.complete %>
       # 
       # Now when a record changes sync will use the names of the lambda parameters 
       # (project_id and user), get the corresponding attributes from the record (project_id column or
