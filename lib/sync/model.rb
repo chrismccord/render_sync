@@ -221,6 +221,9 @@ module Sync
         end
       end
       
+      # Run the collected actions on after_commit callback
+      # Triggers the syncing of the partials
+      #
       def publish_sync_actions
         @sync_actions.each(&:perform)
       end
