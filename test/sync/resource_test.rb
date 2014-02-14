@@ -134,7 +134,13 @@ describe Sync::Partial do
         assert_equal "/en/admin/projects/1/cool/in_group/group/1/users/1", child.polymorphic_path.to_s
       end
     end
+  end
 
+  describe '#model_path' do
+    it 'returns the raw path of the model without any scopes' do
+      child = Sync::Resource.new(@user, @project)
+      assert_equal "/users/1", child.model_path.to_s
+    end
   end
 
   describe '#polymorphic_new_path' do

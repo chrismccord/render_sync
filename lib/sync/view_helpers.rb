@@ -35,7 +35,7 @@ module Sync
                 name:           '#{partial.name}',
                 resourceName:   '#{partial.resource.name}',
                 resourceId:     '#{resource.id}',
-                authToken:      '#{partial.auth_token}',
+                authToken:      '#{partial.refetch_auth_token}',
                 channelUpdate:  '#{partial.channel_for_action(:update)}',
                 channelDestroy: '#{partial.channel_for_action(:destroy)}',
                 selectorStart:  '#{partial.selector_start}',

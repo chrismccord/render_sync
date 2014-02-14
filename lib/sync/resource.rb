@@ -96,12 +96,17 @@ module Sync
       path
     end
 
-    # Returns the Pathname for model and parent resource
+    # Returns an unscoped Pathname for the model (e.g. /users/1)
+    def model_path
+      Pathname.new('/').join(plural_name, id.to_s)
+    end
+
+    # Returns the scoped Pathname for the model (e.g. /users/1/todos/2)
     def polymorphic_path
       scopes_path.join(plural_name, id.to_s)
     end
 
-    # Returns the Pathname for a new model and parent resource
+    # Returns the scoped Pathname for a new model (e.g. /users/1/todos/new)
     def polymorphic_new_path
       scopes_path.join(plural_name, "new")
     end
