@@ -101,15 +101,15 @@ describe Sync::Model do
     it 'publishes record with simple named sync scope' do
       Sync::Model.enable do
         
-        # Create user not in scope (age > 90)
-        user = UserWithSimpleScope.new(age: 85)
-        user.save!
+        # Create user not in scope 'old' (age > 90)
+        user = UserWithSimpleScope.create!(age: 85)
+
         assert_equal 1, user.sync_actions.size
         
         assert_equal :new, user.sync_actions[0].name
         assert_equal "/user_with_simple_scopes/#{user.id}", user.sync_actions[0].test_path
 
-        # Create user which in scope old (age >= 90)
+        # Create user in scope 'old' (age >= 90)
         user = UserWithSimpleScope.new(age: 95)
         user.save!
         assert_equal 2, user.sync_actions.size
@@ -120,7 +120,7 @@ describe Sync::Model do
         assert_equal :new, user.sync_actions[1].name
         assert_equal "/old/user_with_simple_scopes/#{user.id}", user.sync_actions[1].test_path
         
-        # Update of independent attribute name
+        # Update of independent attribute name (user still in scope 'old')
         user.update_attributes!(name: "Foo")
         assert !user.changed?
         assert_equal 2, user.sync_actions.size
@@ -131,8 +131,8 @@ describe Sync::Model do
         assert_equal :update, user.sync_actions[1].name
         assert_equal "/old/user_with_simple_scopes/#{user.id}", user.sync_actions[1].test_path
 
-        # Update of dependent attribute age, so that the record no longer falls into the scope
-        # and has to be destroyed on that channel
+        # Update of dependent attribute age, so that the user no longer falls into scope 'old'
+        # and has to be destroyed on the scoped channel
         user.update_attributes!(age: 80)
         assert !user.changed?
         assert_equal 2, user.sync_actions.size
@@ -143,8 +143,8 @@ describe Sync::Model do
         assert_equal :destroy, user.sync_actions[1].name
         assert_equal "/old/user_with_simple_scopes/#{user.id}", user.sync_actions[1].test_path
 
-        # Update of dependent attribute age, so that the record will fall into the scope
-        # and has to be destroyed on that channel
+        # Update of dependent attribute age, so that the record will fall into scope 'old'
+        # and has to be published as new on that scoped channel
         user.update_attributes(age: 100)
         
         assert !user.changed?
