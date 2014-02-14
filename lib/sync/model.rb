@@ -192,7 +192,7 @@ module Sync
 
       private
 
-      # Publishes updates on the record to subscribers on the sync scope defined by
+      # Creates update actions for subscribers on the sync scope defined by
       # the passed sync scope definition.
       #
       # It compares the state of the record in context of the sync scope before and
@@ -212,6 +212,17 @@ module Sync
 
         new_record_in_new_scope = scope_after_update.contains?(record_after_update)
         new_record_in_old_scope = scope_before_update.contains?(record_after_update)
+
+        Sync.logger.debug "\nscope: #{definition.name}"
+
+        Sync.logger.debug "record_before_update: #{record_before_update.attributes}"
+        Sync.logger.debug "record_after_update: #{record_after_update.attributes}"
+
+        Sync.logger.debug "old_record_in_old_scope: #{old_record_in_old_scope}"
+        Sync.logger.debug "old_record_in_new_scope: #{old_record_in_new_scope}"
+
+        Sync.logger.debug "new_record_in_new_scope: #{new_record_in_new_scope}"
+        Sync.logger.debug "new_record_in_old_scope: #{new_record_in_old_scope}"
 
         # Update/Destroy existing partials of listeners on the scope before the update
         if scope_before_update.valid?
@@ -241,9 +252,10 @@ module Sync
         self.class.sync_scope_definitions.values
       end
 
-      # Stores the current state of the record and of all sync relations in an instance 
-      # variable BEFORE the update command to later be able to check if the record 
-      # has been added/removed from sync scopes.
+      # Stores the current state of the record with its attributes
+      # and all sync relations in an instance variable BEFORE the update 
+      # command to later be able to check if the record has been 
+      # added/removed from sync scopes.
       #
       # Uses ActiveModel::Dirty to track attribute changes
       # (triggered by AR Callback before_update)
