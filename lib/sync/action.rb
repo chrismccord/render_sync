@@ -22,6 +22,11 @@ module Sync
       end
     end
     
+    # Just for testing purposes (see test/sync/model_test.rb)
+    def test_path
+      Resource.new(record, scope).polymorphic_path.to_s
+    end
+    
     private
 
     # Merge default_scope and scope from options Hash
