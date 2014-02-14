@@ -158,17 +158,20 @@ module Sync
       end
 
       def prepare_sync_create
-        @sync_actions.push Action.new(self, :new, scope: sync_default_scope)
+        @sync_actions.push Action.new(self, :new, default_scope: sync_default_scope)
         @sync_actions.push Action.new(sync_default_scope.reload, :update) if sync_default_scope
         
         sync_scope_definitions.each do |definition|
-          @sync_actions.push Action.new(self, :new, scope: Sync::Scope.new_from_model(definition, self), default_scope: sync_default_scope)
+          scope = Sync::Scope.new_from_model(definition, self)
+          if scope.contains?(self)
+            @sync_actions.push Action.new(self, :new, scope: scope, default_scope: sync_default_scope)
+          end
         end
       end
 
       def prepare_sync_update
         if sync_default_scope
-          @sync_actions.push Action.new([self, sync_default_scope.reload], :update)
+          @sync_actions.push Action.new(self, :update, default_scope: sync_default_scope.reload)
         else
           @sync_actions.push Action.new(self, :update)
         end
@@ -178,8 +181,8 @@ module Sync
         end
       end
 
-      def prepare_sync_destroy        
-        @sync_actions.push Action.new(self, :destroy)
+      def prepare_sync_destroy
+        @sync_actions.push Action.new(self, :destroy, default_scope: sync_default_scope)
         @sync_actions.push Action.new(sync_default_scope.reload, :update) if sync_default_scope
         
         sync_scope_definitions.each do |definition|
@@ -214,14 +217,14 @@ module Sync
         if scope_before_update.valid?
           if old_record_in_old_scope && !new_record_in_old_scope
             @sync_actions.push Action.new(record_before_update, :destroy, scope: scope_before_update, default_scope: sync_default_scope)
-          elsif old_record_in_new_scope
+          elsif old_record_in_new_scope && old_record_in_old_scope
             @sync_actions.push Action.new(record_after_update, :update, scope: scope_before_update, default_scope: sync_default_scope)
           end
         end
 
         # Publish new partials to listeners on this new (changed) scope
         if scope_after_update.valid?
-          if new_record_in_new_scope && !new_record_in_old_scope
+          if new_record_in_new_scope && (!old_record_in_old_scope || !new_record_in_old_scope)
             @sync_actions.push Action.new(record_after_update, :new, scope: scope_after_update, default_scope: sync_default_scope)
           end
         end
@@ -246,8 +249,9 @@ module Sync
       # (triggered by AR Callback before_update)
       #
       def store_state_before_update
-        record = self.class.new(self.attributes)
-        record.attributes = self.changed_attributes
+        record = self.class.new(self.attributes.merge(self.changed_attributes))
+        record.send("#{self.class.primary_key}=", self.send(self.class.primary_key))
+        
         @record_before_update = record
         
         @scopes_before_update = {}
