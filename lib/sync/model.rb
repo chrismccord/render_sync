@@ -222,7 +222,6 @@ module Sync
       end
       
       def publish_sync_actions
-        logger.debug "Performing #{@sync_actions.size} Actions"
         @sync_actions.each(&:perform)
       end
       
