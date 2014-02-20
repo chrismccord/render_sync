@@ -27,7 +27,7 @@ module Sync
     end
 
     module ClassMethods
-      attr_accessor :sync_default_scope, :sync_scope_definitions
+      attr_accessor :sync_default_scope, :sync_scope_definitions, :sync_touches
 
       # Set up automatic syncing of partials when creating, deleting and update of records
       #
@@ -38,23 +38,28 @@ module Sync
           @sync_default_scope = actions.last.fetch :scope
         end
         @sync_scope_definitions ||= {}
+        @sync_touches ||= []
+        
         actions = [:create, :update, :destroy] if actions.include? :all
         actions.flatten!
 
         if actions.include? :create
           before_create  :prepare_sync_actions,               if: -> { Sync::Model.enabled? }
           after_create   :prepare_sync_create, on: :create,   if: -> { Sync::Model.enabled? }
+          after_create   :prepare_sync_touches, on: :create,  if: -> { Sync::Model.enabled? }
         end
         
         if actions.include? :update
           before_update  :prepare_sync_actions,               if: -> { Sync::Model.enabled? }
           before_update  :store_state_before_update,          if: -> { Sync::Model.enabled? }
           after_update   :prepare_sync_update, on: :update,   if: -> { Sync::Model.enabled? }
+          after_update   :prepare_sync_touches, on: :update,  if: -> { Sync::Model.enabled? }
         end
         
         if actions.include? :destroy
           before_destroy :prepare_sync_actions,               if: -> { Sync::Model.enabled? }
-          after_destroy   :prepare_sync_destroy, on: :destroy, if: -> { Sync::Model.enabled? }
+          after_destroy  :prepare_sync_destroy, on: :destroy, if: -> { Sync::Model.enabled? }
+          after_destroy  :prepare_sync_touches, on: :destroy, if: -> { Sync::Model.enabled? }
         end
 
         after_commit :publish_sync_actions,                   if: -> { Sync::Model.enabled? }
@@ -133,6 +138,25 @@ module Sync
         singleton_class.send(:define_method, name) do |*args|
           Sync::Scope.new_from_args(@sync_scope_definitions[name], args)
         end        
+      end
+      
+      # Touch an association to be sync'd when this record changes. 
+      #
+      # Example:
+      #
+      #   class Todo < ActiveRecord::Base
+      #     belongs_to :project
+      #
+      #     sync :all
+      #     sync_touch :project, :user
+      #   end
+      #
+      def sync_touch(*args)
+        options = args.extract_options!
+
+        args.each do |arg|
+          @sync_touches.push(arg)
+        end
       end
       
     end
@@ -237,6 +261,12 @@ module Sync
         end
       end
       
+      def prepare_sync_touches
+        sync_touches.each do |touch_association|
+          sync_actions.push Action.new(touch_association, :update)
+        end
+      end
+      
       # Run the collected actions on after_commit callback
       # Triggers the syncing of the partials
       #
@@ -246,6 +276,18 @@ module Sync
       
       def sync_scope_definitions
         self.class.sync_scope_definitions.values
+      end
+      
+      # Return the associations to be touched after a record change
+      # Takes into account that an association itself may have changed during an update call
+      # (e.g. project_id has changed). To accomplish this, it uses the stored record
+      # from before the update (@record_before_update) and touches that as well as
+      # the current association
+      #
+      def sync_touches
+        self.class.sync_touches.map do |touch|
+          [send(touch), (@record_before_update.present? ? @record_before_update.send(touch) : nil)].uniq
+        end.flatten.compact
       end
 
       # Stores the current state of the record with its attributes

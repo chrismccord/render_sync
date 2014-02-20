@@ -44,4 +44,21 @@ class UserWithAdvancedScope < ActiveRecord::Base
   sync_scope :in_group, ->(group) { where(group_id: group.id) }  
 end
 
+class UserTouchingGroup < ActiveRecord::Base
+  self.table_name = :users
+  belongs_to :group
+  
+  sync :all
+  sync_touch :group
+end
+
+class UserTouchingGroupAndProject < ActiveRecord::Base
+  self.table_name = :users
+  belongs_to :group
+  belongs_to :project
+  
+  sync :all
+  sync_touch :group, :project
+end
+
 
