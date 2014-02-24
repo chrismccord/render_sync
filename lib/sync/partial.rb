@@ -11,6 +11,14 @@ module Sync
       end
     end
 
+    def self.find(model, partial_name, context)
+      resource = Resource.new(model)
+      plural_name = resource.plural_name
+      partial = Dir["app/views/sync/#{plural_name}/_#{partial_name}.*"].first
+      return unless partial
+      Partial.new(partial_name, resource.model, nil, context)
+    end
+
     def initialize(name, resource, channel, context)
       self.name = name
       self.resource = Resource.new(resource, channel)
