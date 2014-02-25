@@ -112,7 +112,6 @@ class Sync.Pusher
 
   subscribe: (channel, callback) -> 
     subscription = new Sync.Pusher.Subscription(@client, channel, callback)
-    @channels.push(channel)
     @subscriptions.push(subscription)
     subscription
 
