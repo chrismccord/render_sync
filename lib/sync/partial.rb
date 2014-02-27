@@ -72,7 +72,7 @@ module Sync
     end
 
 
-    #private
+    private
 
     def path
       "sync/#{resource.plural_name}/#{name}"
