@@ -192,11 +192,7 @@ module Sync
       end
 
       def prepare_sync_update
-        if sync_default_scope
-          sync_actions.push Action.new(self, :update, default_scope: sync_default_scope.reload)
-        else
-          sync_actions.push Action.new(self, :update)
-        end
+        sync_actions.push Action.new(self, :update)
 
         sync_scope_definitions.each do |definition|
           prepare_sync_update_scope(definition)
@@ -233,31 +229,14 @@ module Sync
         new_record_in_new_scope = scope_after_update.contains?(record_after_update)
         new_record_in_old_scope = scope_before_update.contains?(record_after_update)
 
-        Sync.logger.debug "\nscope: #{definition.name}"
-
-        Sync.logger.debug "record_before_update: #{record_before_update.attributes}"
-        Sync.logger.debug "record_after_update: #{record_after_update.attributes}"
-
-        Sync.logger.debug "old_record_in_old_scope: #{old_record_in_old_scope}"
-        Sync.logger.debug "old_record_in_new_scope: #{old_record_in_new_scope}"
-
-        Sync.logger.debug "new_record_in_new_scope: #{new_record_in_new_scope}"
-        Sync.logger.debug "new_record_in_old_scope: #{new_record_in_old_scope}"
-
-        # Update/Destroy existing partials of listeners on the scope before the update
-        if scope_before_update.valid?
-          if old_record_in_old_scope && !new_record_in_old_scope
-            sync_actions.push Action.new(record_before_update, :destroy, scope: scope_before_update, default_scope: sync_default_scope)
-          elsif old_record_in_new_scope && old_record_in_old_scope
-            sync_actions.push Action.new(record_after_update, :update, scope: scope_before_update, default_scope: sync_default_scope)
-          end
+        # Add destroy action for the old scope (scope_before_update) if this record has left it
+        if scope_before_update.valid? && old_record_in_old_scope && !new_record_in_old_scope
+          sync_actions.push Action.new(record_before_update, :destroy, scope: scope_before_update, default_scope: sync_default_scope)
         end
 
-        # Publish new partials to listeners on this new (changed) scope
-        if scope_after_update.valid?
-          if new_record_in_new_scope && (!old_record_in_old_scope || !new_record_in_old_scope)
-            sync_actions.push Action.new(record_after_update, :new, scope: scope_after_update, default_scope: sync_default_scope)
-          end
+        # Add new action for the new scope (scope_after_update) if this record has entered it
+        if scope_after_update.valid? && new_record_in_new_scope && (!old_record_in_old_scope || !new_record_in_old_scope)
+          sync_actions.push Action.new(record_after_update, :new, scope: scope_after_update, default_scope: sync_default_scope)
         end
       end
       

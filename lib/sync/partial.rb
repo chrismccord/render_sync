@@ -54,9 +54,18 @@ module Sync
     def channel_prefix
       @channel_prefix ||= auth_token
     end
+    
+    def update_channel_prefix
+      @update_channel_prefix ||= refetch_auth_token
+    end
 
     def channel_for_action(action)
-      "#{channel_prefix}-#{action}"
+      case action
+      when :update
+        "#{update_channel_prefix}-#{action}"
+      else
+        "#{channel_prefix}-#{action}"
+      end
     end
 
     def selector_start

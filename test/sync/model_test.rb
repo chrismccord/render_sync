@@ -81,7 +81,7 @@ describe Sync::Model do
         assert_equal 1, user.sync_actions.size
         
         assert_equal :update, user.sync_actions[0].name
-        assert_equal "/groups/#{group.id}/user_with_default_scopes/#{user.id}", user.sync_actions[0].test_path
+        assert_equal "/user_with_default_scopes/#{user.id}", user.sync_actions[0].test_path
 
         # Destroy
         user.destroy
@@ -123,13 +123,10 @@ describe Sync::Model do
         # Update of independent attribute name (user still in scope 'old')
         user.update_attributes!(name: "Foo")
         assert !user.changed?
-        assert_equal 2, user.sync_actions.size
+        assert_equal 1, user.sync_actions.size
         
         assert_equal :update, user.sync_actions[0].name
         assert_equal "/user_with_simple_scopes/#{user.id}", user.sync_actions[0].test_path
-
-        assert_equal :update, user.sync_actions[1].name
-        assert_equal "/old/user_with_simple_scopes/#{user.id}", user.sync_actions[1].test_path
 
         # Update of dependent attribute age, so that the user no longer falls into scope 'old'
         # and has to be destroyed on the scoped channel
