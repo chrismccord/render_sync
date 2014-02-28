@@ -29,10 +29,13 @@ module Sync
     module ClassMethods
       attr_accessor :sync_default_scope, :sync_scope_definitions, :sync_touches
 
-      # Set up automatic syncing of partials when creating, deleting and update of records
+      # Set up automatic syncing of partials when a record of this class is
+      # created, updated or deleted. Be sure to wrap your model actions inside
+      # a sync_enable block for sync to do its magic.
       #
       def sync(*actions)
         include ModelActions
+        include ChangeTracker
         
         if actions.last.is_a? Hash
           @sync_default_scope = actions.last.fetch :default_scope
@@ -66,17 +69,18 @@ module Sync
 
       end
 
-      # Set up a sync scope for the model defining a set of records to be updated via sync
+      # Set up a sync scope for the model defining a set of records to be 
+      # updated via sync
       #
       # name - The name of the scope
       # lambda - A lambda defining the scope.
       #    Has to return an ActiveRecord::Relation.
       #
       # You can define the lambda with arguments (see examples). 
-      # Note that the naming of the parameters is very important. Only use names of
-      # methods or ActiveRecord attributes defined on the model (e.g. user_id). 
-      # This way sync will be able to pass changed records to the lambda and track
-      # changes to the scope.
+      # Note that the naming of the parameters is very important. Only use 
+      # names of methods or ActiveRecord attributes defined on the model (e.g. 
+      # user_id). This way sync will be able to pass changed records to the 
+      # lambda and track changes to the scope.
       #
       # Example:
       #
@@ -96,8 +100,8 @@ module Sync
       #
       #   <%= sync partial: "todo", collection: @todos, scope: Todo.complete %>
       #
-      # If the collection you want to render is exactly defined be the given scope
-      # the scope can be omitted:
+      # If the collection you want to render is exactly defined be the given 
+      # scope the scope can be omitted:
       #
       #   <%= sync partial: "todo", collection: Todo.complete %>
       #
@@ -109,14 +113,15 @@ module Sync
       #
       #   <%= sync_new partial: "todo", resource: Todo.new, scope: Todo.complete %>
       # 
-      # Now when a record changes sync will use the names of the lambda parameters 
-      # (project_id and user), get the corresponding attributes from the record (project_id column or
-      # user association) and pass it to the lambda. This way sync can identify if a record
-      # has been added or removed from a scope and will then publish the changes to subscribers
+      # Now when a record changes sync will use the names of the lambda 
+      # parameters (project_id and user), get the corresponding attributes from 
+      # the record (project_id column or user association) and pass it to the 
+      # lambda. This way sync can identify if a record has been added or 
+      # removed from a scope and will then publish the changes to subscribers
       # on all scoped channels.
       #
-      # Beware that chaining of sync scopes in the view is currently not possible.
-      # So the following example would raise an exception:
+      # Beware that chaining of sync scopes in the view is currently not 
+      # possible. So the following example would raise an exception:
       #
       #   <%= sync_new partial: "todo", Todo.new, scope: Todo.mine(current_user).incomplete %>
       #
@@ -140,12 +145,13 @@ module Sync
         end        
       end
       
-      # Touch an association to be sync'd when this record changes. 
+      # Register an association to be sync'd when this record changes. 
       #
       # Example:
       #
       #   class Todo < ActiveRecord::Base
       #     belongs_to :project
+      #     belongs_to :user
       #
       #     sync :all
       #     sync_touch :project, :user
@@ -161,139 +167,5 @@ module Sync
       
     end
 
-    module ModelActions
-      attr_accessor :sync_actions
-      
-      def sync_default_scope
-        return nil unless self.class.sync_default_scope
-        send self.class.sync_default_scope
-      end
-      
-      private
-
-      def sync_render_context
-        Sync::Model.context || super
-      end
-      
-      def prepare_sync_actions
-        self.sync_actions = []
-      end
-
-      def prepare_sync_create
-        sync_actions.push Action.new(self, :new, default_scope: sync_default_scope)
-        sync_actions.push Action.new(sync_default_scope.reload, :update) if sync_default_scope
-        
-        sync_scope_definitions.each do |definition|
-          scope = Sync::Scope.new_from_model(definition, self)
-          if scope.contains?(self)
-            sync_actions.push Action.new(self, :new, scope: scope, default_scope: sync_default_scope)
-          end
-        end
-      end
-
-      def prepare_sync_update
-        sync_actions.push Action.new(self, :update)
-
-        sync_scope_definitions.each do |definition|
-          prepare_sync_update_scope(definition)
-        end
-      end
-
-      def prepare_sync_destroy
-        sync_actions.push Action.new(self, :destroy, default_scope: sync_default_scope)
-        sync_actions.push Action.new(sync_default_scope.reload, :update) if sync_default_scope
-        
-        sync_scope_definitions.each do |definition|
-          sync_actions.push Action.new(self, :destroy, scope: Sync::Scope.new_from_model(definition, self), default_scope: sync_default_scope)
-        end
-      end
-
-      # Creates update actions for subscribers on the sync scope defined by
-      # the passed sync scope definition.
-      #
-      # It compares the state of the record in context of the sync scope before and
-      # after the update. If the record has been added to a scope, it publishes a 
-      # new partial to the subscribers of that scope. It also sends a destroy action
-      # to subscribers of the scope, if the record has been removed from it.
-      #
-      def prepare_sync_update_scope(definition)
-        record_before_update = @record_before_update
-        record_after_update = self
-
-        scope_before_update = @scopes_before_update[definition.name][:scope]
-        scope_after_update = Sync::Scope.new_from_model(definition, record_after_update)
-
-        old_record_in_old_scope = @scopes_before_update[definition.name][:contains_record]
-        old_record_in_new_scope = scope_after_update.contains?(record_before_update)
-
-        new_record_in_new_scope = scope_after_update.contains?(record_after_update)
-        new_record_in_old_scope = scope_before_update.contains?(record_after_update)
-
-        # Add destroy action for the old scope (scope_before_update) if this record has left it
-        if scope_before_update.valid? && old_record_in_old_scope && !new_record_in_old_scope
-          sync_actions.push Action.new(record_before_update, :destroy, scope: scope_before_update, default_scope: sync_default_scope)
-        end
-
-        # Add new action for the new scope (scope_after_update) if this record has entered it
-        if scope_after_update.valid? && new_record_in_new_scope && (!old_record_in_old_scope || !new_record_in_old_scope)
-          sync_actions.push Action.new(record_after_update, :new, scope: scope_after_update, default_scope: sync_default_scope)
-        end
-      end
-      
-      def prepare_sync_touches
-        sync_touches.each do |touch_association|
-          sync_actions.push Action.new(touch_association, :update)
-        end
-      end
-      
-      # Run the collected actions on after_commit callback
-      # Triggers the syncing of the partials
-      #
-      def publish_sync_actions
-        sync_actions.each(&:perform)
-      end
-      
-      def sync_scope_definitions
-        self.class.sync_scope_definitions.values
-      end
-      
-      # Return the associations to be touched after a record change
-      # Takes into account that an association itself may have changed during an update call
-      # (e.g. project_id has changed). To accomplish this, it uses the stored record
-      # from before the update (@record_before_update) and touches that as well as
-      # the current association
-      #
-      def sync_touches
-        self.class.sync_touches.map do |touch|
-          [send(touch), (@record_before_update.present? ? @record_before_update.send(touch) : nil)].uniq
-        end.flatten.compact
-      end
-
-      # Stores the current state of the record with its attributes
-      # and all sync relations in an instance variable BEFORE the update 
-      # command to later be able to check if the record has been 
-      # added/removed from sync scopes.
-      #
-      # Uses ActiveModel::Dirty to track attribute changes
-      # (triggered by AR Callback before_update)
-      #
-      def store_state_before_update
-        record = self.class.new(self.attributes.merge(self.changed_attributes))
-        record.send("#{self.class.primary_key}=", self.send(self.class.primary_key))
-        
-        @record_before_update = record
-        
-        @scopes_before_update = {}
-        sync_scope_definitions.each do |definition|
-          scope = Sync::Scope.new_from_model(definition, record)
-          @scopes_before_update[definition.name] = { 
-            scope: scope, 
-            contains_record: scope.contains?(record) 
-          }
-        end
-      end
-
-      
-    end
   end
 end
