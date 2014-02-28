@@ -3,7 +3,7 @@ module Sync
     attr_accessor :klass, :name, :lambda, :parameters, :args
     
     def initialize(klass, name, lambda)
-      self.class.param_names_valid?(klass, lambda)
+      self.class.ensure_valid_params!(klass, lambda)
       
       @klass = klass
       @name = name
@@ -19,7 +19,7 @@ module Sync
     # The name of the passed argument (user) must be present as a column name or an
     # instance method (e.g. an association) of the ActiveRecord object.
     #
-    def self.param_names_valid?(klass, lambda)
+    def self.ensure_valid_params!(klass, lambda)
       unless (invalid = lambda.parameters.map { |p| p[1] } - klass.column_names.map(&:to_sym) - klass.instance_methods) == []
         raise ArgumentError, "Invalid parameters #{invalid}. Parameter names of the sync_scope lambda definition may only contain ActiveRecord column names or instance methods of #{klass.name}."
       end
