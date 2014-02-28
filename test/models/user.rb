@@ -26,7 +26,7 @@ class UserWithDefaultScope < ActiveRecord::Base
   self.table_name = :users
   belongs_to :group
   
-  sync :all, scope: :group
+  sync :all, default_scope: :group
 end
 
 class UserWithSimpleScope < ActiveRecord::Base

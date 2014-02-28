@@ -35,7 +35,7 @@ module Sync
         include ModelActions
         
         if actions.last.is_a? Hash
-          @sync_default_scope = actions.last.fetch :scope
+          @sync_default_scope = actions.last.fetch :default_scope
         end
         @sync_scope_definitions ||= {}
         @sync_touches ||= []
