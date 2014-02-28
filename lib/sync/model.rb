@@ -35,7 +35,7 @@ module Sync
       #
       def sync(*actions)
         include ModelActions
-        include ChangeTracker
+        include ChangeTracking
         
         if actions.last.is_a? Hash
           @sync_default_scope = actions.last.fetch :default_scope

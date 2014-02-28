@@ -1,5 +1,5 @@
 module Sync
-  module ChangeTracker
+  module ChangeTracking
     private
     
     # Stores the current state of the record with its attributes
