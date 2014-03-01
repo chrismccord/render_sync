@@ -159,7 +159,7 @@ approach in a controlled, threadsafe way.
     belongs_to :project, counter_cache: true
     has_many :comments, dependent: :destroy
 
-    sync :all, scope: :project
+    sync :all, default_scope: :project
 
   end
 ```
