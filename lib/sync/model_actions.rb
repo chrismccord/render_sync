@@ -23,7 +23,6 @@ module Sync
 
     def prepare_sync_create
       add_sync_action(:new, self, default_scope: sync_default_scope)
-      add_sync_action(:update, sync_default_scope.reload) if sync_default_scope
       
       sync_scope_definitions.each do |definition|
         scope = Sync::Scope.new_from_model(definition, self)
@@ -43,7 +42,6 @@ module Sync
 
     def prepare_sync_destroy
       add_sync_action :destroy, self, default_scope: sync_default_scope
-      add_sync_action :update, sync_default_scope.reload if sync_default_scope
       
       sync_scope_definitions.each do |definition|
         add_sync_action :destroy, self, 
