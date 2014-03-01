@@ -4,7 +4,7 @@ This release focuses on improving and extending the model DSL for setting up aut
 
 - Adds the ability for advanced channel scoping
 
-  There were multiple feature requests asking for a way to sync differently scoped lists of the same model automatically and independently (e.g all todos of a user and all todos of a project). This can now be accomplished by explicitly defining scopes on the model via the new ```sync_scope``` method: 
+  There were multiple feature requests asking for a way to sync differently scoped lists of the same model automatically and interdependently (e.g all todos of a user and all todos of a project). This can now be accomplished by explicitly defining scopes on the model via the new `sync_scope` method: 
 
   ```ruby
   class Todo < ActiveRecord::Base
@@ -27,11 +27,11 @@ This release focuses on improving and extending the model DSL for setting up aut
 
   Please take a look at the docs and the readme for a more thorough explanation and examples on how to use this new feature.
   
-- Adds the ability to explicitly update parent associations via ```sync_touch```
+- Adds the ability to explicitly update parent associations via `sync_touch`
 
 ####Breaking Changes in the model DSL:
 
-- The ```:scope``` parameter for the ```sync``` method has been replaced with ```:default_scope```. Make sure you update your code accordingly. If you're using the default scope feature, be sure to alway add the corresponding option to your views like this:
+- The `:scope` parameter for the `sync` method has been replaced with `:default_scope`. Make sure you update your code accordingly. If you're using the default scope feature, be sure to alway add the corresponding option to your views like this:
 
   ```ruby
   class Todo < ActiveRecord::Base
@@ -46,9 +46,9 @@ This release focuses on improving and extending the model DSL for setting up aut
   <%= sync_new partial: "todo", resource: Todo.new, default_scope: @organization %>
   ```
 
-- The parent model defined by the ```:default_scope``` parameter will no longer be automatically updated via sync. Please use the new explicit ```sync_touch``` method instead.
+- The parent model defined by the `:default_scope` parameter will no longer be automatically updated via sync. Please use the new explicit `sync_touch` method instead.
 
-  Old Syntax (up until  0.2.3):
+  Old Syntax:
   ```ruby
   class Todo < ActiveRecord::Base
     belongs_to :project
@@ -58,7 +58,7 @@ This release focuses on improving and extending the model DSL for setting up aut
   end
   ```
   
-  New Syntax (as of 0.3.0):
+  New Syntax:
   ```ruby
   class Todo < ActiveRecord::Base
     belongs_to :project
@@ -69,7 +69,7 @@ This release focuses on improving and extending the model DSL for setting up aut
   end
   ```
   
-  This will sync all partials of the parent model ```project``` and ```user```, whenever a todo is created/updated/deleted.
+  This will sync all partials of the parent model `project` and `user`, whenever a todo is created/updated/deleted.
 
 # Version 0.2.7 - Feburary 25, 2014
 
