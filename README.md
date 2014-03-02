@@ -163,7 +163,7 @@ Now, whenever a Todo is created/updated/destroyed inside an action of the `Todos
 
 ### Updating multiple sets of records with sync scopes
 
-Sometimes you might want to display multiple differently scoped todo lists throughout application and keep them all in sync. For example:
+Sometimes you might want to display multiple differently scoped todo lists throughout your application and keep them all in sync. For example:
 
 - A global list with all todos
 - A list with all completed todos
@@ -236,7 +236,7 @@ sync_scope :completed_by_user, ->(user) { completed.by_user(current_user) }
 
 #### Things to keep in mind when using `sync_scope`
 
-Please keep in mind that the more sync scopes you set up the more sync messages will be send over your pubsub adapter. So be sure keep the number scopes small and remove scopes you are not using.
+Please keep in mind that the more sync scopes you set up the more sync messages will be send over your pubsub adapter. So be sure to keep the number scopes small and remove scopes you are not using.
 
 #### Automatic updating of parent associations
 
