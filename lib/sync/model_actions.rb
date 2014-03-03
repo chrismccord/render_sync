@@ -101,10 +101,14 @@ module Sync
     #
     def sync_touches
       self.class.sync_touches.map do |touch|
-        [send(touch), (@record_before_update.present? ? @record_before_update.send(touch) : nil)].uniq
-      end.flatten.compact
+        if @record_before_update.present?
+          [send(touch).reload, @record_before_update.send(touch).reload]
+        else
+          send(touch).reload
+        end
+      end.flatten.compact.uniq
     end
-    
+        
   end
 
 end
