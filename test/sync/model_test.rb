@@ -232,7 +232,15 @@ describe Sync::Model do
 
         assert_equal :update, user.sync_actions[2].name
         assert_equal "/groups/#{group1.id}", user.sync_actions[2].test_path
+
+        user.group = nil
+        user.save!
+
+        assert !user.changed?
+        assert_equal 2, user.sync_actions.size
       
+        assert_equal :update, user.sync_actions[1].name
+        assert_equal "/groups/#{group2.id}", user.sync_actions[1].test_path
       end
     end
 

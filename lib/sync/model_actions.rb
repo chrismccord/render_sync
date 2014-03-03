@@ -100,13 +100,19 @@ module Sync
     # and touches that as well as the current association
     #
     def sync_touches
-      self.class.sync_touches.map do |touch|
+      sync_associations = []
+
+      self.class.sync_touches.each do |touch|
+        current = send(touch)
+        sync_associations.push(current.reload) if current.present?
+        
         if @record_before_update.present?
-          [send(touch).reload, @record_before_update.send(touch).reload]
-        else
-          send(touch).reload
+          previous = @record_before_update.send(touch)
+          sync_associations.push(previous.reload) if previous.present?
         end
-      end.flatten.compact.uniq
+      end
+
+      sync_associations.uniq.compact
     end
         
   end
