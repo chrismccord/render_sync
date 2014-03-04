@@ -71,10 +71,17 @@ module Sync
     #
     def sync_new(resource, options = {})
       scope = options[:scope]
+      partial_name = options[:partial]
       resources = [resource].flatten
       messages = resources.collect do |resource|
-        all_partials(resource, sync_render_context).collect do |partial|
-          partial.creator_for_scope(scope).message
+        if partial_name
+          specified_partials(resource, sync_render_context, partial_name).collect do |partial|
+            partial.creator_for_scope(scope).message
+          end
+        else
+          all_partials(resource, sync_render_context).collect do |partial|
+            partial.creator_for_scope(scope).message
+          end
         end
       end
 
