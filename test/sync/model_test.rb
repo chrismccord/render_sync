@@ -6,7 +6,7 @@ setup_database
 
 describe Sync::Model do
 
-  it 'can is disabled by default' do
+  it 'is disabled by default' do
     refute Sync::Model.enabled?
   end
 
@@ -34,7 +34,7 @@ describe Sync::Model do
 
   let(:model) { FakeModel.new name: "Foo" }
 
-  it 'can be mixed in to a model to allow sync' do
+  it 'can be mixed into a model to allow sync' do
     model.stubs(:sync_new)
     model.stubs(:sync_update)
     model.stubs(:sync_destroy)
