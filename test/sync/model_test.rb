@@ -6,7 +6,7 @@ setup_database
 
 describe Sync::Model do
 
-  it 'can is disabled by default' do
+  it 'is disabled by default' do
     refute Sync::Model.enabled?
   end
 
