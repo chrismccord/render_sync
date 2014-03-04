@@ -29,7 +29,24 @@ This release focuses on improving and extending the model DSL for setting up aut
   
 - Adds the ability to explicitly update parent associations via `sync_touch`
 
-####Breaking Changes in the model DSL:
+####Breaking Changes:
+
+- If you're using the scope feature to narrow the syncing of new records in the `sync_new` call, you will now have to add this scope when calling the `sync` helper method as well:
+
+  ```erb
+  <%= sync partial: 'todo_comment', collection: @comments, scope: @todo %>
+  <%= sync_new partial: 'todo_comment', resource: Comment.new, scope: @todo %>
+  ```
+
+  If you're in addition using the controller way of manually syncing partials, you will now also have to add the scope parameter to the sync_destroy call like this:
+
+  ```ruby
+  sync_destroy @comment, scope: @comment.todo
+  ```
+  
+  Why is this?
+  
+  Before this version there was only a global destroy channel for every record, so an unscoped `sync_destroy` call was just enough to remove all partials from all subscribed clients when a record has been destroyed. As of 0.3.0 the destroy channel will be used not only to remove  partials when a record is destroyed, but also when partials for that record need to be added to/removed from different sets throughout the application when it is updated.
 
 - The `:scope` parameter for the `sync` method has been replaced with `:default_scope`. Make sure you update your code accordingly. If you're using the default scope feature, be sure to alway add the corresponding option to your views like this:
 
