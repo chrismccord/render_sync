@@ -34,38 +34,28 @@ module Sync
       # a sync_enable block for sync to do its magic.
       #
       def sync(*actions)
-        include ModelActions
-        include ChangeTracking
+        include ModelActions unless include?(ModelActions)
+        include ModelChangeTracking unless include?(ModelChangeTracking)
+        include ModelSyncing
         
         if actions.last.is_a? Hash
           @sync_default_scope = actions.last.fetch :default_scope
         end
-        @sync_scope_definitions ||= {}
-        @sync_touches ||= []
         
         actions = [:create, :update, :destroy] if actions.include? :all
         actions.flatten!
 
         if actions.include? :create
-          before_create  :prepare_sync_actions,               if: -> { Sync::Model.enabled? }
-          after_create   :prepare_sync_create, on: :create,   if: -> { Sync::Model.enabled? }
-          after_create   :prepare_sync_touches, on: :create,  if: -> { Sync::Model.enabled? }
+          after_create  :prepare_sync_create,  if: -> { Sync::Model.enabled? }
         end
         
         if actions.include? :update
-          before_update  :prepare_sync_actions,               if: -> { Sync::Model.enabled? }
-          before_update  :store_state_before_update,          if: -> { Sync::Model.enabled? }
-          after_update   :prepare_sync_update, on: :update,   if: -> { Sync::Model.enabled? }
-          after_update   :prepare_sync_touches, on: :update,  if: -> { Sync::Model.enabled? }
+          after_update  :prepare_sync_update,  if: -> { Sync::Model.enabled? }
         end
         
         if actions.include? :destroy
-          before_destroy :prepare_sync_actions,               if: -> { Sync::Model.enabled? }
-          after_destroy  :prepare_sync_destroy, on: :destroy, if: -> { Sync::Model.enabled? }
-          after_destroy  :prepare_sync_touches, on: :destroy, if: -> { Sync::Model.enabled? }
+          after_destroy :prepare_sync_destroy, if: -> { Sync::Model.enabled? }
         end
-
-        after_commit :publish_sync_actions,                   if: -> { Sync::Model.enabled? }
 
       end
 
@@ -145,7 +135,7 @@ module Sync
         end        
       end
       
-      # Register an association to be sync'd when this record changes. 
+      # Register one or more associations to be sync'd when this record changes. 
       #
       # Example:
       #
@@ -158,8 +148,21 @@ module Sync
       #   end
       #
       def sync_touch(*args)
-        options = args.extract_options!
+        # Only load Modules and set up callbacks if sync_touch wasn't 
+        # called before
+        if @sync_touches.blank?
+          include ModelActions unless include?(ModelActions)
+          include ModelChangeTracking unless include?(ModelChangeTracking)
+          include ModelTouching
+        
+          @sync_touches ||= []
+        
+          after_create   :prepare_sync_touches, if: -> { Sync::Model.enabled? }
+          after_update   :prepare_sync_touches, if: -> { Sync::Model.enabled? }
+          after_destroy  :prepare_sync_touches, if: -> { Sync::Model.enabled? }
+        end
 
+        options = args.extract_options!
         args.each do |arg|
           @sync_touches.push(arg)
         end

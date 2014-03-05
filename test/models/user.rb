@@ -52,6 +52,13 @@ class UserTouchingGroup < ActiveRecord::Base
   sync_touch :group
 end
 
+class UserJustTouchingGroup < ActiveRecord::Base
+  self.table_name = :users
+  belongs_to :group
+  
+  sync_touch :group
+end
+
 class UserTouchingGroupAndProject < ActiveRecord::Base
   self.table_name = :users
   belongs_to :group

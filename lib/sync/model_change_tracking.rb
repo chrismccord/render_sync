@@ -1,6 +1,13 @@
 module Sync
-  module ChangeTracking
+  module ModelChangeTracking
     private
+    # Set up callback to store record and sync scope states prior
+    # the update action
+    def self.included(base)
+      base.class_eval do
+        before_update :store_state_before_update, if: -> { Sync::Model.enabled? }
+      end
+    end
     
     # Stores the current state of the record with its attributes
     # and all sync relations in an instance variable BEFORE the update 

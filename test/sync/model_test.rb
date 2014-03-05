@@ -209,7 +209,42 @@ describe Sync::Model do
   end
   
   describe "touching associated records explicitly" do
-    it 'touches single association if configured' do
+    it 'unsyncd user touches single association if configured' do
+      Sync::Model.enable do
+        group1 = Group.create
+        group2 = Group.create
+        user = UserJustTouchingGroup.create!(group: group1)
+    
+        assert user.persisted?
+        assert_equal 1, user.sync_actions.size
+    
+        assert_equal :update, user.sync_actions[0].name
+        assert_equal "/groups/#{group1.id}", user.sync_actions[0].test_path
+    
+        user.group = group2
+        user.save!
+    
+        assert !user.changed?
+        assert_equal 2, user.sync_actions.size
+      
+        assert_equal :update, user.sync_actions[0].name
+        assert_equal "/groups/#{group2.id}", user.sync_actions[0].test_path
+    
+        assert_equal :update, user.sync_actions[1].name
+        assert_equal "/groups/#{group1.id}", user.sync_actions[1].test_path
+    
+        user.group = nil
+        user.save!
+    
+        assert !user.changed?
+        assert_equal 1, user.sync_actions.size
+      
+        assert_equal :update, user.sync_actions[0].name
+        assert_equal "/groups/#{group2.id}", user.sync_actions[0].test_path
+      end
+    end
+    
+    it 'syncd user touches single association if configured' do
       Sync::Model.enable do
         group1 = Group.create
         group2 = Group.create
