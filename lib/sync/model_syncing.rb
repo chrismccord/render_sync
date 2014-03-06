@@ -26,9 +26,12 @@ module Sync
       add_sync_action :destroy, self, default_scope: sync_default_scope
       
       sync_scope_definitions.each do |definition|
-        add_sync_action :destroy, self, 
-          scope: Sync::Scope.new_from_model(definition, self), 
-          default_scope: sync_default_scope
+        scope = Sync::Scope.new_from_model(definition, self)
+        if scope.valid?
+          add_sync_action :destroy, self, 
+            scope: scope, 
+            default_scope: sync_default_scope
+        end
       end
     end
 
