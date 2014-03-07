@@ -1,0 +1,21 @@
+# Faye
+development:
+  server: "http://localhost:9292/faye"
+  adapter_javascript_url: "http://localhost:9292/faye/faye.js" 
+  auth_token: "secret"
+  adapter: "Faye"
+  async: true
+  
+test:
+  server: "http://localhost:9292/faye"
+  adapter_javascript_url: "http://localhost:9292/faye/faye.js" 
+  adapter: "Faye"
+  auth_token: "secret"
+  async: false
+
+production:
+  server: "http://localhost:9292/faye"
+  adapter_javascript_url: "http://localhost:9292/faye/faye.js" 
+  adapter: "Faye"
+  auth_token: "secret"
+  async: true
