@@ -2,18 +2,18 @@ module Sync
   class Partial
     attr_accessor :name, :resource, :context
 
-    def self.all(model, context)
-      resource = Resource.new(model)
+    def self.all(model, context, scope = nil)
+      resource = Resource.new(model, scope)
 
       Dir["app/views/sync/#{resource.plural_name}/_*.*"].map do |partial|
         partial_name = File.basename(partial)
-        Partial.new(partial_name[1...partial_name.index('.')], resource.model, nil, context)
+        Partial.new(partial_name[1...partial_name.index('.')], resource.model, scope, context)
       end
     end
 
-    def initialize(name, resource, channel, context)
+    def initialize(name, resource, scope, context)
       self.name = name
-      self.resource = Resource.new(resource, channel)
+      self.resource = Resource.new(resource, scope)
       self.context = context
     end
 
@@ -41,13 +41,31 @@ module Sync
     def auth_token
       @auth_token ||= Channel.new("#{polymorphic_path}-_#{name}").to_s
     end
+    
+    # For the refetch feature we need an auth_token that wasn't created
+    # with scopes, because the scope information is not available on the
+    # refetch-request. So we create a refetch_auth_token which is based 
+    # only on model_name and id plus the name of this partial
+    #
+    def refetch_auth_token
+      @refetch_auth_token ||= Channel.new("#{model_path}-_#{name}").to_s
+    end
 
     def channel_prefix
       @channel_prefix ||= auth_token
     end
+    
+    def update_channel_prefix
+      @update_channel_prefix ||= refetch_auth_token
+    end
 
     def channel_for_action(action)
-      "#{channel_prefix}-#{action}"
+      case action
+      when :update
+        "#{update_channel_prefix}-#{action}"
+      else
+        "#{channel_prefix}-#{action}"
+      end
     end
 
     def selector_start
@@ -73,6 +91,10 @@ module Sync
       locals_hash = {}
       locals_hash[resource.base_name.to_sym] = resource.model
       locals_hash
+    end
+    
+    def model_path
+      resource.model_path
     end
 
     def polymorphic_path

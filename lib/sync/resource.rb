@@ -8,11 +8,17 @@ module Sync
     #
     # model - The ActiveModel instace for this Resource
     # scopes - The optional scopes to prefix polymorphic paths with.
-    #          Can be a Symbol/String, a parent model or an Array
-    #          with a combination of both.
+    #          Can be a Symbol/String, a parent model or an Sync::Scope
+    #          or an Array with any combination.
     #
     # Examples
     #
+    #   class User < ActiveRecord::Base
+    #     sync :all
+    #     sync_scope :cool, -> { where(cool: true) }
+    #     sync_scope :in_group, ->(group) { where(group_id: group.id) }
+    #   end
+    # 
     #   user = User.find(1)
     #
     #   resource = Resource.new(user)
@@ -31,9 +37,22 @@ module Sync
     #   resource.polymorphic_path => "/projects/2/users/1"
     #   resource.polymorphic_new_path => "/projects/2/users/new"
     #
+    #   resource = Resource.new(user, User.cool)
+    #   resource.polymorphic_path => "/cool/users/2"
+    #   resource.polymorphic_new_path => "/cool/users/new"
+    #
+    #   resource = Resource.new(user, User.in_group(group))
+    #   resource.polymorphic_path => "/in_group/group/3/users/2"
+    #   resource.polymorphic_new_path => "/in_group/group/3/users/new"
+    #
+    #   resource = Resource.new(user, [:admin, User.cool, User.in_group(group)])
+    #   resource.polymorphic_path => "admin/cool/in_group/group/3/users/2"
+    #   resource.polymorphic_new_path => "admin/cool/in_group/group/3/users/new"
+    #
     #   resource = Resource.new(user, [:admin, project])
     #   resource.polymorphic_path => "/admin/projects/2/users/1"
     #   resource.polymorphic_new_path => "/admin/projects/2/users/new"
+    #
     def initialize(model, scopes = nil)
       self.model = model
       self.scopes = scopes
@@ -64,7 +83,9 @@ module Sync
       path = Pathname.new('/')
       unless scopes.nil?
         paths = scopes.map do |scope|
-          if scope.class.respond_to? :model_name
+          if scope.is_a?(Sync::Scope)
+            scope.polymorphic_path.relative_path_from(path)
+          elsif scope.class.respond_to? :model_name
             Resource.new(scope).polymorphic_path.relative_path_from(path)
           else
             scope.to_s
@@ -75,12 +96,17 @@ module Sync
       path
     end
 
-    # Returns the Pathname for model and parent resource
+    # Returns an unscoped Pathname for the model (e.g. /users/1)
+    def model_path
+      Pathname.new('/').join(plural_name, id.to_s)
+    end
+
+    # Returns the scoped Pathname for the model (e.g. /users/1/todos/2)
     def polymorphic_path
       scopes_path.join(plural_name, id.to_s)
     end
 
-    # Returns the Pathname for a new model and parent resource
+    # Returns the scoped Pathname for a new model (e.g. /users/1/todos/new)
     def polymorphic_new_path
       scopes_path.join(plural_name, "new")
     end

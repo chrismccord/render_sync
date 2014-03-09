@@ -1,7 +1,7 @@
 require_relative '../test_helper'
 require 'rails/all'
 require_relative 'abstract_controller'
-require_relative 'user'
+require_relative '../models/user'
 
 describe Sync::Partial do
   include TestHelper

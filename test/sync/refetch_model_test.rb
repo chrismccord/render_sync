@@ -1,5 +1,5 @@
 require_relative '../test_helper'
-require_relative 'user'
+require_relative '../models/user'
 require 'mocha/setup'
 
 describe Sync::RefetchModel do
