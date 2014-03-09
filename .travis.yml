@@ -1,0 +1,24 @@
+language: ruby
+
+rvm:
+  - 1.9.2
+  - 1.9.3
+  - 2.0.0
+  - 2.1.0
+
+gemfile:
+  - gemfiles/Gemfile.rails-3.x
+  - gemfiles/Gemfile.rails-4.x
+
+# Exclude old, unsupported dependencies
+# E.g Active::Support 4.x requires Ruby version >= 1.9.2.
+matrix:
+  exclude:
+    - rvm: 1.9.2
+      gemfile: gemfiles/Gemfile.rails-4.x
+
+# Set up and start Faye Server before tests are run
+before_script:
+  - cp test/travis/sync.yml config/sync.yml
+  - cp test/travis/sync.ru sync.ru
+  - bundle exec rackup sync.ru -E production 2>&1 > test.log &
