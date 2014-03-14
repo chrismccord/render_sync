@@ -53,6 +53,7 @@ module Sync
       yaml = YAML.load(ERB.new(File.read(filename)).result)[environment.to_s]
       raise ArgumentError, "The #{environment} environment does not exist in #{filename}" if yaml.nil?
       yaml.each{|key, value| config[key.to_sym] = value }
+      raise ArgumentError, "auth_token missing" if config[:auth_token].nil?
       setup_logger
       setup_client
     end
