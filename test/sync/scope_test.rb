@@ -11,7 +11,7 @@ describe Sync::Scope do
 
   describe '#initialize' do
     it 'return an Sync::Scope instance' do
-      assert_instance_of Sync::Scope, User.with_group_id(5)
+      assert_kind_of Sync::Scope, User.with_group_id(5)
     end
 
     it 'raises an argument error with an invalid param (float)' do
@@ -22,7 +22,7 @@ describe Sync::Scope do
 
     it 'returns an Sync::Scope instance and sets instance variables correctly' do
       scope = User.with_group_id(5)
-      assert_instance_of Sync::Scope, scope
+      assert_kind_of Sync::Scope, scope
       assert_equal scope.args, [5]
       assert_equal scope.scope_definition, User.sync_scope_definitions[:with_group_id]
     end
@@ -33,7 +33,7 @@ describe Sync::Scope do
       scope_definition = User.sync_scope_definitions[:with_group_id]
       user = User.create(group_id: 3)
       scope = Sync::Scope.new_from_model(scope_definition, user)
-      assert_instance_of Sync::Scope, scope
+      assert_kind_of Sync::Scope, scope
       assert_equal scope.args, [3]
       assert_equal scope.scope_definition, scope_definition
     end
@@ -42,7 +42,7 @@ describe Sync::Scope do
   describe '#relation' do
     it 'returns the ActiveRecord::Relation' do
       scope = User.with_group_id(5)
-      assert_instance_of ActiveRecord::Relation, scope.relation
+      assert_kind_of ActiveRecord::Relation, scope.relation
     end
   end
   
