@@ -108,6 +108,10 @@ module Sync
         extensions: [FayeExtension.new]
       }.merge(options))
     end
+    
+    def views_root
+      Rails.root.join('app', 'views', 'sync')
+    end
   end
 end
 

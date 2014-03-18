@@ -5,7 +5,7 @@ module Sync
     def self.all(model, context, scope = nil)
       resource = Resource.new(model, scope)
 
-      Dir["app/views/sync/#{resource.plural_name}/_*.*"].map do |partial|
+      Dir["#{Sync.views_root}/#{resource.plural_name}/_*.*"].map do |partial|
         partial_name = File.basename(partial)
         Partial.new(partial_name[1...partial_name.index('.')], resource.model, scope, context)
       end
