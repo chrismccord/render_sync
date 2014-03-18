@@ -1,4 +1,4 @@
-# Sync
+# Sync [![Build Status](https://travis-ci.org/chrismccord/sync.png?branch=master)](https://travis-ci.org/chrismccord/sync)
 > This started as a thought experiment that is growing into a viable option for realtime Rails apps without ditching
   the standard rails stack that we love and are so productive with for a heavy client side MVC framework.
 
