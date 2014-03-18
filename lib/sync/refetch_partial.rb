@@ -4,7 +4,7 @@ module Sync
     def self.all(model, context, scope = nil)
       resource = Resource.new(model)
 
-      Dir["app/views/sync/#{resource.plural_name}/refetch/_*.*"].map do |partial|
+      Dir["#{Sync.views_root}/#{resource.plural_name}/refetch/_*.*"].map do |partial|
         partial_name = File.basename(partial)
         RefetchPartial.new(partial_name[1...partial_name.index('.')], resource.model, scope, context)
       end
@@ -13,7 +13,7 @@ module Sync
     def self.find(model, partial_name, context)
       resource = Resource.new(model)
       plural_name = resource.plural_name
-      partial = Dir["app/views/sync/#{plural_name}/refetch/_#{partial_name}.*"].first
+      partial = Dir["#{Sync.views_root}/#{plural_name}/refetch/_#{partial_name}.*"].first
       return unless partial
       RefetchPartial.new(partial_name, resource.model, nil, context)
     end
