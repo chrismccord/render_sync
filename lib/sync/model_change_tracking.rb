@@ -19,7 +19,11 @@ module Sync
     #
     def store_state_before_update
       record = self.dup
-      record.assign_attributes(self.changed_attributes, without_protection: true)
+      if Rails.version < "4"
+        record.assign_attributes(self.changed_attributes, without_protection: true)
+      else
+        record.assign_attributes(self.changed_attributes)
+      end
       record.send("#{self.class.primary_key}=", self.send(self.class.primary_key))
       
       @record_before_update = record
