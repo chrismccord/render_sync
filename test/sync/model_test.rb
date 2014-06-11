@@ -1,7 +1,5 @@
 require_relative '../test_helper'
 require 'mocha/setup'
-require_relative '../test_helper'
-require 'mocha/setup'
 require 'rails/all'
 
 setup_database
