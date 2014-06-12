@@ -18,7 +18,10 @@ module Sync
     # (triggered by AR Callback before_update)
     #
     def store_state_before_update
-      record = self.class.new(self.attributes.merge(self.changed_attributes))
+      record = self.dup
+      changed_attributes.each do |key, value|
+        record.send("#{key}=", value)
+      end
       record.send("#{self.class.primary_key}=", self.send(self.class.primary_key))
       
       @record_before_update = record

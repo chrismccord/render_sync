@@ -68,4 +68,15 @@ class UserTouchingGroupAndProject < ActiveRecord::Base
   sync_touch :group, :project
 end
 
+# Setup test user with protected attributes (only allow cool)
+# if Rails < 4 or Rails > 4 with gem protected_attributes
+class UserWithProtectedAttributes < ActiveRecord::Base
+  attr_accessible :cool if Rails.version < "4"
+  self.table_name = :users
+  sync :all
+end
+
+if Rails.version < "4"
+  UserWithProtectedAttributes.mass_assignment_sanitizer = :strict
+end
 
