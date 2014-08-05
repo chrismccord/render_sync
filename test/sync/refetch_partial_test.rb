@@ -1,7 +1,7 @@
 require_relative '../test_helper'
 require 'rails/all'
 require_relative 'abstract_controller'
-require_relative 'user'
+require_relative '../models/user'
 
 describe Sync::RefetchPartial do
   include TestHelper
@@ -13,27 +13,22 @@ describe Sync::RefetchPartial do
  
   describe '#self.all' do
     it 'returns an array of all Partials for given model' do
-      # TODO: Must configure Rails application for Rails.root
+      assert_equal 1, Sync::RefetchPartial.all(User.new, @context).size
+      assert_equal Sync::RefetchPartial, Sync::RefetchPartial.all(User.new, @context)[0].class
     end
   end
 
   describe '#self.find' do
     it 'finds partial given resource and partial name' do
-      Dir.stubs(:[]).returns("_show.html.erb")
-      assert_equal Sync::RefetchPartial, Sync::RefetchPartial.find(User.new, 'show', nil).class
+      assert_equal Sync::RefetchPartial, Sync::RefetchPartial.find(User.new, 'show', @context).class
     end
 
     it 'returns nil if partial does not exist' do
-      Dir.stubs(:[]).returns []
       refute Sync::RefetchPartial.find(User.new, 'not_exist', nil)
     end
   end
 
   describe '#self.find_by_authorized_resource' do
-
-    before do
-      Dir.stubs(:[]).returns("_show.html.erb")
-    end
 
     it 'returns partial when given auth token for resource and template' do
       assert_equal Sync::RefetchPartial, Sync::RefetchPartial.find_by_authorized_resource(

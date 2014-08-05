@@ -11,7 +11,7 @@ describe "Faye" do
 
   describe "normalize_channel" do
     it 'converts channel to faye server friendly format with leading forward-slash' do
-      assert_equal "/", Sync.client.normalize_channel("alfjalkjfkfjaslkfj2342424").first
+      assert_equal "/", Sync.client.normalize_channel("alfjalkjfkfjaslkfj2342424")[0]
     end
   end
 
@@ -99,7 +99,7 @@ describe "Pusher" do
 
   describe "normalize_channel" do
     it 'converts channel to pusher server friendly format without leading forward-slash' do
-      refute Sync.client.normalize_channel("alfjalkjfkfjaslkfj2342424").first == "/"
+      refute Sync.client.normalize_channel("alfjalkjfkfjaslkfj2342424")[0] == "/"
     end
   end
 

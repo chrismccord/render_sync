@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = "sync"
-  s.version     = "0.2.6"
+  s.version     = "0.3.1"
   s.author      = "Chris McCord"
   s.email       = "chris@chrismccord.com"
   s.homepage    = "http://github.com/chrismccord/sync"
@@ -20,6 +20,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'mocha', '~> 0.13.3'
   s.add_development_dependency 'sqlite3'
   s.add_development_dependency 'pry'
+  s.add_development_dependency 'minitest', '< 5.0.0'
 
   s.required_rubygems_version = ">= 1.3.4"
 end

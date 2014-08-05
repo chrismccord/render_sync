@@ -1,4 +1,4 @@
-# Sync
+# Sync [![Build Status](https://travis-ci.org/chrismccord/sync.png?branch=master)](https://travis-ci.org/chrismccord/sync)
 > This started as a thought experiment that is growing into a viable option for realtime Rails apps without ditching
   the standard rails stack that we love and are so productive with for a heavy client side MVC framework.
 
@@ -140,28 +140,110 @@ And the parent view changed to:
 I'm currently investigating true DOM ranges via the [Range](https://developer.mozilla.org/en-US/docs/DOM/range) object.
 
 
-## 'Automatic' syncing through the sync DSL
+## 'Automatic' syncing through the sync model DSL
 
 In addition to calling explicit sync actions within controller methods, a
 `sync` and `enable_sync` DSL has been added to ActionController::Base and ActiveRecord::Base to automate the syncing 
 approach in a controlled, threadsafe way.
 
-### Example Controller/Model
+### Example Model/Controller
+```ruby
+  class Todo < ActiveRecord::Base
+    sync :all
+  end
+```
 ```ruby
   class TodosController < ApplicationController
-
     enable_sync only: [:create, :update, :destroy]
     ...
   end
+```
 
-  class Todo < ActiveRecord::Base
+Now, whenever a Todo is created/updated/destroyed inside an action of the `TodosController` changes are automatically pushed to all subscribed clients without manually calling sync actions.
 
-    belongs_to :project, counter_cache: true
-    has_many :comments, dependent: :destroy
+### Updating multiple sets of records with sync scopes
 
-    sync :all, scope: :project
+Sometimes you might want to display multiple differently scoped todo lists throughout your application and keep them all in sync. For example:
 
-  end
+- A global list with all todos
+- A list with all completed todos
+- A list with all todos of a user
+- A list with all todos of a project
+- ...
+
+This was quite tricky to accomplish in previous versions of sync. Well, now this is going to be dead simple with the help of explicit sync scopes. First, define your desired sync scopes on the model with `sync_scope` like this:
+
+```ruby
+class Todo < ActiveRecord::Base
+  belongs_to :user
+  belongs_to :project
+  
+  sync :all
+  
+  sync_scope :active, -> { where(completed: false) }
+  sync_scope :completed, -> { where(completed: true) }
+end
+```
+
+Then in your views display the different sets of todos by passing the `scope` as a parameter like this:
+
+```erb
+<%= sync partial: "todo", collection: Todo.active %>
+<%= sync_new partial: "todo", resource: Todo.new, scope: Todo.active %>
+
+<%= sync partial: "todo", collection: Todo.completed %>
+<%= sync_new partial: "todo", resource: Todo.new, scope: Todo.completed %>
+```
+
+Now, whenever a todo is created/updated/destroyed sync will push the appropriate changes to all affected clients. This also works for attribute changes that concern the belonging to a specific scope itself. E.g. if the `completed` flag is set to `true` during an update action sync will automatically push the todo partial to all clients displaying the list of completed todos and remove it from all clients subscribed to the list of active todos.
+
+#### Advanced scoping with parameters
+
+In order to display lists that are dynamically scoped (e.g. by the `current_user` or a `@project` instance variable) you can setup dynamic sync scopes like this:
+
+```ruby
+sync_scope :by_user, ->(user) { where(user_id: user.id) }
+sync_scope :by_project, ->(project) { where(project_id: project.id) }
+```
+
+Note that the naming of the parameters is very important for sync to do its magic. Be sure to only use names of methods, parent associations or ActiveRecord attributes defined on the model (e.g. in this case `user` and `project`). This way sync will be able to detect changes to the scope.
+
+Setup the rendering of the partials in the views with:
+
+```erb
+<%= sync partial: "todo", collection: Todo.by_user(current_user) %>
+<%= sync_new partial: "todo", resource: Todo.new, scope: Todo.by_user(current_user) %>
+
+<%= sync partial: "todo", collection: Todo.by_project(@project) %>
+<%= sync_new partial: "todo", resource: Todo.new, scope: Todo.by_project(@project) %>
+```
+
+Beware that chaining of sync scopes in the view is currently not supported. So the following example would not work as expected:
+      
+```erb
+<%= sync_new partial: "todo", Todo.new, scope: Todo.by_user(current_user).completed %>
+```  
+
+To work around this just create an explicit sync_scope for your use case:
+       
+```ruby
+sync_scope :completed_by_user, ->(user) { completed.by_user(current_user) }
+```
+
+```erb      
+<%= sync_new partial: "todo", Todo.new, scope: Todo.completed_by_user(current_user) %>
+```
+
+#### Things to keep in mind when using `sync_scope`
+
+Please keep in mind that the more sync scopes you set up the more sync messages will be send over your pubsub adapter. So be sure to keep the number scopes small and remove scopes you are not using.
+
+#### Automatic updating of parent associations
+
+If you want to automatically sync the partials of a parent association whenever a record changes you can use the `sync_touch` method. E.g. if you always want to sync the partials of the associated `user` and `project` just add this line to your `Todo` class:
+
+```ruby
+sync_touch :project, :user
 ```
 
 ### Syncing outside of the controller

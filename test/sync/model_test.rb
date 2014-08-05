@@ -26,69 +26,290 @@ describe Sync::Model do
     refute Sync::Model.enabled?
   end
 
-  class FakeModel < ActiveRecord::Base
-    self.table_name = 'todos'
+  describe 'syncing of model changes to all listening channels' do
+    it 'publishes record (create/update/destroy) to main new channel' do
+      Sync::Model.enable do
+        user = UserWithoutScopes.new
 
-    sync :all
+        # Create
+        user.save!
+        assert user.persisted?
+        assert_equal 1, user.sync_actions.size
+
+        assert_equal :new, user.sync_actions[0].name
+        assert_equal "/user_without_scopes/#{user.id}", user.sync_actions[0].test_path
+
+        # Update
+        user.update_attributes!(name: "Foo")
+        assert user.persisted?
+        assert_equal 1, user.sync_actions.size
+
+        assert_equal :update, user.sync_actions[0].name
+        assert_equal "/user_without_scopes/#{user.id}", user.sync_actions[0].test_path
+
+        # Destroy
+        user.destroy
+        assert user.destroyed?
+        assert_equal 1, user.sync_actions.size
+
+        assert_equal :destroy, user.sync_actions[0].name
+        assert_equal "/user_without_scopes/#{user.id}", user.sync_actions[0].test_path
+      end
+    end
+
+    it 'publishes record with default scope to scope channel and parent channel' do
+      Sync::Model.enable do
+
+        # Create
+        group = Group.create!
+        user = UserWithDefaultScope.new(group: group)
+        user.save!
+
+        assert user.persisted?
+        assert_equal 1, user.sync_actions.size
+
+        assert_equal :new, user.sync_actions[0].name
+        assert_equal "/groups/#{group.id}/user_with_default_scopes/#{user.id}", user.sync_actions[0].test_path
+
+        # Update
+        user.update_attributes!(name: "Foo")
+
+        assert user.persisted?
+        assert_equal 1, user.sync_actions.size
+
+        assert_equal :update, user.sync_actions[0].name
+        assert_equal "/user_with_default_scopes/#{user.id}", user.sync_actions[0].test_path
+
+        # Destroy
+        user.destroy
+
+        assert user.destroyed?
+        assert_equal 1, user.sync_actions.size
+
+        assert_equal :destroy, user.sync_actions[0].name
+        assert_equal "/groups/#{group.id}/user_with_default_scopes/#{user.id}", user.sync_actions[0].test_path
+
+      end
+    end
+
+    it 'publishes record with simple named sync scope' do
+      Sync::Model.enable do
+
+        # Create user not in scope 'old' (age > 90)
+        user = UserWithSimpleScope.create!(age: 85)
+
+        assert_equal 1, user.sync_actions.size
+
+        assert_equal :new, user.sync_actions[0].name
+        assert_equal "/user_with_simple_scopes/#{user.id}", user.sync_actions[0].test_path
+
+        # Create user in scope 'old' (age >= 90)
+        user = UserWithSimpleScope.new(age: 95)
+        user.save!
+        assert_equal 2, user.sync_actions.size
+
+        assert_equal :new, user.sync_actions[0].name
+        assert_equal "/user_with_simple_scopes/#{user.id}", user.sync_actions[0].test_path
+
+        assert_equal :new, user.sync_actions[1].name
+        assert_equal "/old/user_with_simple_scopes/#{user.id}", user.sync_actions[1].test_path
+
+        # Update of independent attribute name (user still in scope 'old')
+        user.update_attributes!(name: "Foo")
+        assert !user.changed?
+        assert_equal 1, user.sync_actions.size
+
+        assert_equal :update, user.sync_actions[0].name
+        assert_equal "/user_with_simple_scopes/#{user.id}", user.sync_actions[0].test_path
+
+        # Update of dependent attribute age, so that the user no longer falls into scope 'old'
+        # and has to be destroyed on the scoped channel
+        user.update_attributes!(age: 80)
+        assert !user.changed?
+        assert_equal 2, user.sync_actions.size
+
+        assert_equal :update, user.sync_actions[0].name
+        assert_equal "/user_with_simple_scopes/#{user.id}", user.sync_actions[0].test_path
+
+        assert_equal :destroy, user.sync_actions[1].name
+        assert_equal "/old/user_with_simple_scopes/#{user.id}", user.sync_actions[1].test_path
+
+        # Update of dependent attribute age, so that the record will fall into scope 'old'
+        # and has to be published as new on that scoped channel
+        user.update_attributes(age: 100)
+
+        assert !user.changed?
+        assert_equal 2, user.sync_actions.size
+
+        assert_equal :update, user.sync_actions[0].name
+        assert_equal "/user_with_simple_scopes/#{user.id}", user.sync_actions[0].test_path
+
+        assert_equal :new, user.sync_actions[1].name
+        assert_equal "/old/user_with_simple_scopes/#{user.id}", user.sync_actions[1].test_path
+
+        # Destroy user currently in scoped by 'old'
+        user.destroy
+
+        assert user.destroyed?
+        assert_equal 2, user.sync_actions.size
+
+        assert_equal :destroy, user.sync_actions[0].name
+        assert_equal "/user_with_simple_scopes/#{user.id}", user.sync_actions[0].test_path
+
+        assert_equal :destroy, user.sync_actions[1].name
+        assert_equal "/old/user_with_simple_scopes/#{user.id}", user.sync_actions[1].test_path
+
+      end
+    end
+
+    it 'publishes record with a named sync scope that takes arguments' do
+      Sync::Model.enable do
+
+        # Create user not in scope 'in_group'
+        group1 = Group.create
+        group2 = Group.create
+        user = UserWithAdvancedScope.create!
+
+        assert user.persisted?
+        assert_equal 1, user.sync_actions.size
+
+        assert_equal :new, user.sync_actions[0].name
+        assert_equal "/user_with_advanced_scopes/#{user.id}", user.sync_actions[0].test_path
+
+        # Create user in scope 'in_group'
+        user = UserWithAdvancedScope.create!(group: group1)
+
+        assert user.persisted?
+        assert_equal 2, user.sync_actions.size
+
+        assert_equal :new, user.sync_actions[0].name
+        assert_equal "/user_with_advanced_scopes/#{user.id}", user.sync_actions[0].test_path
+
+        assert_equal :new, user.sync_actions[1].name
+        assert_equal "/in_group/group/#{group1.id}/user_with_advanced_scopes/#{user.id}", user.sync_actions[1].test_path
+
+        # Change group
+        user.update_attributes(group: group2)
+
+        assert user.persisted?
+        assert_equal 3, user.sync_actions.size
+
+        assert_equal :update, user.sync_actions[0].name
+        assert_equal "/user_with_advanced_scopes/#{user.id}", user.sync_actions[0].test_path
+
+        assert_equal :destroy, user.sync_actions[1].name
+        assert_equal "/in_group/group/#{group1.id}/user_with_advanced_scopes/#{user.id}", user.sync_actions[1].test_path
+
+        assert_equal :new, user.sync_actions[2].name
+        assert_equal "/in_group/group/#{group2.id}/user_with_advanced_scopes/#{user.id}", user.sync_actions[2].test_path
+
+      end
+    end
+
   end
 
-  let(:model) { FakeModel.new name: "Foo" }
+  describe "touching associated records explicitly" do
+    it 'unsyncd user touches single association if configured' do
+      Sync::Model.enable do
+        group1 = Group.create
+        group2 = Group.create
+        user = UserJustTouchingGroup.create!(group: group1)
 
-  it 'can be mixed in to a model to allow sync' do
-    model.stubs(:sync_new)
-    model.stubs(:sync_update)
-    model.stubs(:sync_destroy)
+        assert user.persisted?
+        assert_equal 1, user.sync_actions.size
 
-    Sync::Model.enable do
-      model.expects(:sync_new).with(model, scope: nil)
-      model.save!
+        assert_equal :update, user.sync_actions[0].name
+        assert_equal "/groups/#{group1.id}", user.sync_actions[0].test_path
 
-      model.expects(:sync_update).with(model)
-      model.save!
+        user.group = group2
+        user.save!
 
-      model.expects(:sync_destroy).with(model)
-      model.destroy
+        assert !user.changed?
+        assert_equal 2, user.sync_actions.size
+
+        assert_equal :update, user.sync_actions[0].name
+        assert_equal "/groups/#{group2.id}", user.sync_actions[0].test_path
+
+        assert_equal :update, user.sync_actions[1].name
+        assert_equal "/groups/#{group1.id}", user.sync_actions[1].test_path
+
+        user.group = nil
+        user.save!
+
+        assert !user.changed?
+        assert_equal 1, user.sync_actions.size
+
+        assert_equal :update, user.sync_actions[0].name
+        assert_equal "/groups/#{group2.id}", user.sync_actions[0].test_path
+      end
+    end
+
+    it 'syncd user touches single association if configured' do
+      Sync::Model.enable do
+        group1 = Group.create
+        group2 = Group.create
+        user = UserTouchingGroup.create!(group: group1)
+
+        assert user.persisted?
+        assert_equal 2, user.sync_actions.size
+
+        assert_equal :update, user.sync_actions[1].name
+        assert_equal "/groups/#{group1.id}", user.sync_actions[1].test_path
+
+        user.group = group2
+        user.save!
+
+        assert !user.changed?
+        assert_equal 3, user.sync_actions.size
+
+        assert_equal :update, user.sync_actions[1].name
+        assert_equal "/groups/#{group2.id}", user.sync_actions[1].test_path
+
+        assert_equal :update, user.sync_actions[2].name
+        assert_equal "/groups/#{group1.id}", user.sync_actions[2].test_path
+
+        user.group = nil
+        user.save!
+
+        assert !user.changed?
+        assert_equal 2, user.sync_actions.size
+
+        assert_equal :update, user.sync_actions[1].name
+        assert_equal "/groups/#{group2.id}", user.sync_actions[1].test_path
+      end
+    end
+
+    it 'touches multiple associations if configured' do
+      Sync::Model.enable do
+        group = Group.create
+        project = Project.create
+        user = UserTouchingGroupAndProject.create!(group: group, project: project)
+
+        assert user.persisted?
+        assert_equal 3, user.sync_actions.size
+
+        assert_equal :update, user.sync_actions[1].name
+        assert_equal "/groups/#{group.id}", user.sync_actions[1].test_path
+
+        assert_equal :update, user.sync_actions[2].name
+        assert_equal "/projects/#{project.id}", user.sync_actions[2].test_path
+
+      end
     end
   end
 
-  it 'does not have a sync scope if it is not specified' do
-    assert model.sync_scope.nil?
+
+  it 'does not have a sync default scope if it is not specified' do
+    user = User.new name: "Foo"
+    assert user.sync_default_scope.nil?
   end
 
   it 'does not sync if sync is not enabled' do
-    model = FakeModel.new name: "Foo"
-    model.stubs(:sync_new)
+    user = UserWithSimpleScope.new name: "Foo"
+    user.stubs(:publish_actions)
 
-    model.expects(:sync_new).with(model).never
-    model.save!
+    user.expects(:publish_actions).never
+    user.save!
   end
 
-  class FakeModelWithParent < ActiveRecord::Base
-    self.table_name = 'todos'
-    sync :all, scope: :my_scope
-  end
-
-  it 'can have a scope specified when mixed into the model' do
-    model = FakeModelWithParent.new
-    scope = FakeModel.new
-    model.stubs(:sync_new)
-    model.stubs(:sync_update)
-    model.stubs(:sync_destroy)
-    model.stubs(:my_scope).returns(scope)
-    scope.stubs(:reload).returns(scope)
-
-    assert_equal scope, model.sync_scope
-
-    Sync::Model.enable do
-      model.expects(:sync_new).with(model, scope: scope)
-      model.save!
-
-      model.expects(:sync_update).with([model, scope])
-      model.save!
-
-      model.expects(:sync_destroy).with(model)
-      model.expects(:sync_update).with(scope)
-      model.destroy
-    end
-  end
 end

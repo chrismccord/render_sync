@@ -6,7 +6,7 @@ module Sync
       self.name = name
       self.resource = Resource.new(resource, scopes)
       self.context = context
-      self.partial = Partial.new(name, self.resource.model, nil, context)
+      self.partial = Partial.new(name, self.resource.model, scopes, context)
     end
 
     def auth_token

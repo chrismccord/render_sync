@@ -1,7 +1,7 @@
 require_relative '../test_helper'
 require 'rails/all'
 require_relative 'abstract_controller'
-require_relative 'user'
+require_relative '../models/user'
 
 describe Sync::Partial do
   include TestHelper
@@ -13,7 +13,8 @@ describe Sync::Partial do
 
   describe '#self.all' do
     it 'returns an array of all Partials for given model' do
-      # TODO: Must configure Rails application for Rails.root
+      assert_equal 1, Sync::Partial.all(User.new, @context).size
+      assert_equal Sync::Partial, Sync::Partial.all(User.new, @context)[0].class
     end
   end
 
