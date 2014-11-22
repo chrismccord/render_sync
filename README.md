@@ -334,6 +334,25 @@ sync_new @todo, scope: @project
 
 Both approaches can be combined. Just supply an Array of Strings/Symbols and/or parent resources to the `scope` option. Note that the order of elements matters. Be sure to use the same order in your view and in your controller/model.
 
+## Scoping by Partial
+
+If a single resource has a bunch of different sync partials, calling `sync_new` or `sync_update` could be very expensive, as sync would need to render each partial for that resource, even if only one partial would be affected by the update. Because of this, sync allows you to scope these by the name of the partial:
+
+```rb
+def UsersController < ApplicationController
+  …
+  def create
+    …
+    if @user.save
+      sync_new @user, partial: 'users_count'      
+    end
+    …
+  end
+end
+```
+
+In the above example, only the `sync/users/users_count` partial will be rendered and pushed to subscribed clients.
+
 ## Refetching Partials
 
 Refetching allows syncing partials across different users when the partial requires the session's context (ie. current_user). 
