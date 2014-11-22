@@ -11,6 +11,14 @@ module Sync
       end
     end
 
+    def self.find(model, partial_name, context)
+      resource = Resource.new(model)
+      plural_name = resource.plural_name
+      partial = Dir["app/views/sync/#{plural_name}/_#{partial_name}.*"].first
+      return unless partial
+      Partial.new(partial_name, resource.model, nil, context)
+    end
+
     def initialize(name, resource, scope, context)
       self.name = name
       self.resource = Resource.new(resource, scope)
@@ -41,10 +49,10 @@ module Sync
     def auth_token
       @auth_token ||= Channel.new("#{polymorphic_path}-_#{name}").to_s
     end
-    
+
     # For the refetch feature we need an auth_token that wasn't created
     # with scopes, because the scope information is not available on the
-    # refetch-request. So we create a refetch_auth_token which is based 
+    # refetch-request. So we create a refetch_auth_token which is based
     # only on model_name and id plus the name of this partial
     #
     def refetch_auth_token
@@ -54,7 +62,7 @@ module Sync
     def channel_prefix
       @channel_prefix ||= auth_token
     end
-    
+
     def update_channel_prefix
       @update_channel_prefix ||= refetch_auth_token
     end
@@ -92,7 +100,7 @@ module Sync
       locals_hash[resource.base_name.to_sym] = resource.model
       locals_hash
     end
-    
+
     def model_path
       resource.model_path
     end

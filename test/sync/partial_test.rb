@@ -10,11 +10,23 @@ describe Sync::Partial do
     @context = ActionController::Base.new
     @partial = Sync::Partial.new("show", User.new, nil, @context)
   end
- 
+
   describe '#self.all' do
     it 'returns an array of all Partials for given model' do
       assert_equal 1, Sync::Partial.all(User.new, @context).size
       assert_equal Sync::Partial, Sync::Partial.all(User.new, @context)[0].class
+    end
+  end
+
+  describe '#self.find' do
+    it 'finds partial given resource and partial name' do
+      Dir.stubs(:[]).returns("_show.html.erb")
+      assert_equal Sync::Partial, Sync::Partial.find(User.new, 'show', nil).class
+    end
+
+    it 'returns nil if partial does not exist' do
+      Dir.stubs(:[]).returns []
+      refute Sync::Partial.find(User.new, 'not_exist', nil)
     end
   end
 
@@ -23,7 +35,7 @@ describe Sync::Partial do
       assert_equal "<h1>1<\/h1>", @partial.render_to_string
     end
   end
-  
+
   describe '#render' do
     it 'renders' do
       # TODO stub out
