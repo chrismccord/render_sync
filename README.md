@@ -258,18 +258,23 @@ sessionless context.
 
 ### Example Syncing from a background worker or rails console
 ```ruby
- # Inside some script/worker
-  Sync::Model.enable do
-    Todo.first.update title: "This todo will be sync'd on save"
-  end
-  Todo.first.update title: "This todo will NOT be sync'd on save"
+class MyJob
+  include Sync::Actions
 
-  Sync::Model.enable!
-  Todo.first.update title: "This todo will be sync'd on save"
-  Todo.first.update title: "This todo will be sync'd on save"
-  Todo.first.update title: "This todo will be sync'd on save"
-  Sync::Model.disable!
-  Todo.first.update title: "This todo will NOT be sync'd on save"
+  def perform
+    Sync::Model.enable do
+      Todo.first.update title: "This todo will be sync'd on save"
+    end
+    Todo.first.update title: "This todo will NOT be sync'd on save"
+
+    Sync::Model.enable!
+    Todo.first.update title: "This todo will be sync'd on save"
+    Todo.first.update title: "This todo will be sync'd on save"
+    Todo.first.update title: "This todo will be sync'd on save"
+    Sync::Model.disable!
+    Todo.first.update title: "This todo will NOT be sync'd on save"
+  end
+end
 ```
   
 ## Custom Sync Views and javascript hooks
