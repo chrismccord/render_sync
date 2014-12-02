@@ -5,3 +5,5 @@ Gemfile.lock
 .bundle
 .DS_Store
 test/fixtures/test.sqlite3
+test/dummy/db/*
+test/dummy/log/*
