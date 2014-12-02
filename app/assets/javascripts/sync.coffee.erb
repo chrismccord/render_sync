@@ -9,6 +9,7 @@ $ = jQuery
   CLIENT_ADAPTER: "<%= Sync.adapter %>"
 
   init: ->
+    return unless Sync[@CLIENT_ADAPTER]
     @adapter = new Sync[@CLIENT_ADAPTER]
     $ =>
       return if @isReady()
