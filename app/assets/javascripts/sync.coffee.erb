@@ -9,9 +9,9 @@ $ = jQuery
   CLIENT_ADAPTER: "<%= Sync.adapter %>"
 
   init: ->
+    return unless Sync[@CLIENT_ADAPTER]
     @adapter = new Sync[@CLIENT_ADAPTER]
     $ =>
-      return unless window["<%= Sync.adapter %>"]?
       return if @isReady()
       @ready = true
       @connect()
