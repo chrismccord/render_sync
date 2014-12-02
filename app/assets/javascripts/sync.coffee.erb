@@ -1,7 +1,7 @@
 $ = jQuery
 
-@Sync = 
-  
+@Sync =
+
   ready: false
   readyQueue: []
   FAYE_HOST: "<%= Sync.server %>"
@@ -43,7 +43,7 @@ $ = jQuery
       @readyQueue.push callback
 
 
-  flushReadyQueue: -> 
+  flushReadyQueue: ->
     @onReady(callback) for callback in @readyQueue
     @readyQueue = []
 
@@ -73,68 +73,79 @@ $ = jQuery
     Sync.View
 
 
-class Sync.Faye
+class Sync.Adapter
+
+  subscriptions: []
+
+  unsubscribeAll: ->
+    subscription.cancel() for subscription in @subscriptions
+    @subscriptions = []
+
+  # If the channel is already subscribed, we do two things:
+  #   1. cancel() the subscription
+  #   2. remove the channel from our @subscriptions array
+  unsubscribeChannel: (channel) ->
+    for sub, index in @subscriptions when sub.channel is channel
+      sub.cancel()
+      @subscriptions.splice(index, 1)
+      return
+
+  subscribe: (channel, callback) ->
+    @unsubscribeChannel(channel)
+    subscription = new Sync[Sync.CLIENT_ADAPTER].Subscription(@client, channel, callback)
+    @subscriptions.push(subscription)
+    subscription
+
+
+class Sync.Faye extends Sync.Adapter
 
   subscriptions: []
 
   connect: ->
     @client = new window.Faye.Client(Sync.FAYE_HOST)
 
-
   isConnected: -> @client?.getState() is "CONNECTED"
-
-  subscribe: (channel, callback) -> 
-    subscription = new Sync.Faye.Subscription(@client, channel, callback)
-    @subscriptions.push(subscription)
-    subscription
-
-  unsubscribeAll: ->
-    subscription.cancel() for subscription in @subscriptions
-    @subscriptions = []
 
 
 class Sync.Faye.Subscription
+
   constructor: (@client, channel, callback) ->
+    @channel = channel
     @fayeSub = @client.subscribe channel, callback
-    
+
   cancel: ->
     @fayeSub.cancel()
-    
-    
-class Sync.Pusher
+
+
+class Sync.Pusher extends Sync.Adapter
 
   subscriptions: []
 
   connect: ->
     @client = new window.Pusher(Sync.PUSHER_API_KEY)
 
-
   isConnected: -> @client?.connection.state is "connected"
 
-  subscribe: (channel, callback) -> 
+  subscribe: (channel, callback) ->
+    @unsubscribeChannel(channel)
     subscription = new Sync.Pusher.Subscription(@client, channel, callback)
     @subscriptions.push(subscription)
     subscription
 
-  unsubscribeAll: ->
-    subscription.cancel() for subscription in @subscriptions
-    @subscriptions = []
 
-
-    
 class Sync.Pusher.Subscription
   constructor: (@client, channel, callback) ->
-    @pusherSub = channel
-    
-    channel = @client.subscribe(channel)
-    channel.bind 'sync', callback
-    
+    @channel = channel
+
+    pusherSub = @client.subscribe(channel)
+    pusherSub.bind 'sync', callback
+
   cancel: ->
-    @client.unsubscribe(@pusherSub) if @client.channel(@pusherSub)?
+    @client.unsubscribe(@channel) if @client.channel(@channel)?
 
 
 class Sync.View
-  
+
   removed: false
 
   constructor: (@$el, @name) ->
@@ -142,7 +153,7 @@ class Sync.View
   beforeUpdate: (html, data) -> @update(html)
 
   afterUpdate: -> #noop
-  
+
   beforeInsert: ($el, data) -> @insert($el)
 
   afterInsert: -> #noop
@@ -164,7 +175,7 @@ class Sync.View
 
   show: -> @$el.show()
 
-  update: (html) -> 
+  update: (html) ->
     $new = $($.trim(html))
     @$el.replaceWith($new)
     @$el = $new
@@ -172,7 +183,7 @@ class Sync.View
     @bind()
 
 
-  insert: ($el) -> 
+  insert: ($el) ->
     @$el.replaceWith($el)
     @$el = $el
     @afterInsert()
@@ -227,10 +238,10 @@ class Sync.Partial
 
     @subscriptionDestroy = @adapter.subscribe @channelDestroy, => @remove()
 
-  
+
   update: (html) -> @view.beforeUpdate(html, {})
 
-  remove: -> 
+  remove: ->
     @view.beforeRemove()
     @destroy() if @view.isRemoved()
 
