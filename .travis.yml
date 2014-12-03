@@ -21,4 +21,4 @@ matrix:
 before_script:
   - cp test/travis/sync.yml config/sync.yml
   - cp test/travis/sync.ru sync.ru
-  - bundle exec rackup sync.ru -E production 2>&1 > test.log &
+  - thin start -R sync.ru -p 9292 -t 1 2>&1 > test.log &
