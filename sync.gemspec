@@ -8,6 +8,7 @@ Gem::Specification.new do |s|
   s.description = "Sync turns your Rails partials realtime with automatic updates through Faye"
   s.files       = Dir["{app,config,lib,test}/**/*", "[A-Z]*", "init.rb"] - ["Gemfile.lock"]
   s.require_path = "lib"
+  s.licenses    = ['MIT']
 
   s.add_dependency 'em-http-request'
 
