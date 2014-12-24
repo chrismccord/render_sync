@@ -1,30 +1,34 @@
 # Faye
 development:
   server: "http://localhost:9292/faye"
-  adapter_javascript_url: "http://localhost:9292/faye/faye.js" 
+  adapter_javascript_url: "http://localhost:9292/faye/faye.js"
   auth_token: DEVELOPMENT_SECRET_TOKEN
   adapter: "Faye"
   async: true
 
 # Pusher
 # development:
-#   adapter_javascript_url: "http://js.pusher.com/2.0/pusher.min.js" 
+#   adapter_javascript_url: "http://js.pusher.com/2.0/pusher.min.js"
 #   app_id: "YOUR_PUSHER_APP_ID"
 #   api_key: "YOUR_PUSHER_API_KEY"
 #   auth_token: "YOUR_PUSHER_SECRET"
 #   adapter: "Pusher"
 #   async: true
 
+# Disabled
+# development:
+#   adapter: false
+
 test:
   server: "http://localhost:9292/faye"
-  adapter_javascript_url: "http://localhost:9292/faye/faye.js" 
+  adapter_javascript_url: "http://localhost:9292/faye/faye.js"
   adapter: "Faye"
   auth_token: "secret"
   async: false
 
 production:
   server: "http://example.com/faye"
-  adapter_javascript_url: "http://localhost:9292/faye/faye.js" 
+  adapter_javascript_url: "http://localhost:9292/faye/faye.js"
   adapter: "Faye"
   auth_token: "<%= defined?(SecureRandom) ? SecureRandom.hex(32) : ActiveSupport::SecureRandom.hex(32) %>"
   async: true

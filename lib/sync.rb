@@ -27,6 +27,7 @@ require 'sync/channel'
 require 'sync/resource'
 require 'sync/clients/faye'
 require 'sync/clients/pusher'
+require 'sync/clients/dummy'
 require 'sync/reactor'
 if defined? Rails
   require 'sync/erb_tracker'
@@ -53,14 +54,24 @@ module Sync
       yaml = YAML.load(ERB.new(File.read(filename)).result)[environment.to_s]
       raise ArgumentError, "The #{environment} environment does not exist in #{filename}" if yaml.nil?
       yaml.each{|key, value| config[key.to_sym] = value }
-      raise ArgumentError, "auth_token missing" if config[:auth_token].nil?
       setup_logger
-      setup_client
+
+      if adapter
+        setup_client
+      else
+        setup_dummy_client
+      end
     end
 
     def setup_client
+      raise ArgumentError, "auth_token missing" if config[:auth_token].nil?
       @client = Sync::Clients.const_get(adapter).new
       @client.setup
+    end
+
+    def setup_dummy_client
+      config[:auth_token] = 'dummy_auth_token'
+      @client = Sync::Clients::Dummy.new
     end
 
     def setup_logger
@@ -108,7 +119,7 @@ module Sync
         extensions: [FayeExtension.new]
       }.merge(options))
     end
-    
+
     def views_root
       Rails.root.join('app', 'views', 'sync')
     end
