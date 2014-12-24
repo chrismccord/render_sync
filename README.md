@@ -33,7 +33,7 @@ In addition to real-time updates, Sync also provides:
 
 ## Requirements
 
-  - Ruby >= 1.9.2
+  - Ruby >= 1.9.3
   - Rails 3 >= 3.1 or Rails 4
   - jQuery >= 1.9
 
@@ -92,8 +92,8 @@ rackup sync.ru -E production
 Set your configuration in the generated `config/sync.yml` file, using the Pusher adapter. No extra process/setup.
 
 ## Current Caveats
-The current implementation uses a DOM range query (jQuery's `nextUntil`) to match your partial's "element" in 
-the DOM. The way this selector works requires your sync'd partial to be wrapped in a root level html tag for that partial file. 
+The current implementation uses a DOM range query (jQuery's `nextUntil`) to match your partial's "element" in
+the DOM. The way this selector works requires your sync'd partial to be wrapped in a root level html tag for that partial file.
 For example, this parent view/sync partial approach would *not* work:
 
 Given the sync partial `_todo_row.html.erb`:
@@ -143,7 +143,7 @@ I'm currently investigating true DOM ranges via the [Range](https://developer.mo
 ## 'Automatic' syncing through the sync model DSL
 
 In addition to calling explicit sync actions within controller methods, a
-`sync` and `enable_sync` DSL has been added to ActionController::Base and ActiveRecord::Base to automate the syncing 
+`sync` and `enable_sync` DSL has been added to ActionController::Base and ActiveRecord::Base to automate the syncing
 approach in a controlled, threadsafe way.
 
 ### Example Model/Controller
@@ -177,9 +177,9 @@ This was quite tricky to accomplish in previous versions of sync. Well, now this
 class Todo < ActiveRecord::Base
   belongs_to :user
   belongs_to :project
-  
+
   sync :all
-  
+
   sync_scope :active, -> { where(completed: false) }
   sync_scope :completed, -> { where(completed: true) }
 end
@@ -219,18 +219,18 @@ Setup the rendering of the partials in the views with:
 ```
 
 Beware that chaining of sync scopes in the view is currently not supported. So the following example would not work as expected:
-      
+
 ```erb
 <%= sync_new partial: "todo", Todo.new, scope: Todo.by_user(current_user).completed %>
-```  
+```
 
 To work around this just create an explicit sync_scope for your use case:
-       
+
 ```ruby
 sync_scope :completed_by_user, ->(user) { completed.by_user(current_user) }
 ```
 
-```erb      
+```erb
 <%= sync_new partial: "todo", Todo.new, scope: Todo.completed_by_user(current_user) %>
 ```
 
@@ -276,7 +276,7 @@ class MyJob
   end
 end
 ```
-  
+
 ## Custom Sync Views and javascript hooks
 
 Sync allows you to hook into and override or extend all of the actions it performs when updating partials on the client side. When a sync partial is rendered, sync will instantiate a javascript View class based on the following order of lookup:
@@ -349,7 +349,7 @@ def UsersController < ApplicationController
   def create
     …
     if @user.save
-      sync_new @user, partial: 'users_count'      
+      sync_new @user, partial: 'users_count'
     end
     …
   end
@@ -360,7 +360,7 @@ In the above example, only the `sync/users/users_count` partial will be rendered
 
 ## Refetching Partials
 
-Refetching allows syncing partials across different users when the partial requires the session's context (ie. current_user). 
+Refetching allows syncing partials across different users when the partial requires the session's context (ie. current_user).
 
 Ex:
     View: Add `refetch: true` to sync calls, and place partial file in a 'refetch'
@@ -376,7 +376,7 @@ The partial file would be located in `app/views/sync/todos/refetch/_list_row.htm
 
 *Notes*
 
-While this approach works very well for the cases it's needed, syncing without refetching should be used unless refetching is absolutely necessary for performance reasons. For example, 
+While this approach works very well for the cases it's needed, syncing without refetching should be used unless refetching is absolutely necessary for performance reasons. For example,
 
 A sync update request is triggered on the server for a 'regular' sync'd partial with 100 listening clients:
 - number of http requests 1
@@ -477,7 +477,7 @@ def UsersController < ApplicationController
   def create
     @user = User.new(user_params)
     if @user.save
-      sync_new @user      
+      sync_new @user
     end
     respond_to do |format|
       format.html { redirect_to users_url }
