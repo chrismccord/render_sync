@@ -12,7 +12,7 @@ $ = jQuery
     return unless Sync[@CLIENT_ADAPTER]
     @adapter = new Sync[@CLIENT_ADAPTER]
     $ =>
-      return if @isReady()
+      return if @isReady() || !@adapter.available()
       @ready = true
       @connect()
       @flushReadyQueue()
@@ -101,6 +101,9 @@ class Sync.Faye extends Sync.Adapter
 
   subscriptions: []
 
+  available: ->
+    !!window.Faye
+
   connect: ->
     @client = new window.Faye.Client(Sync.FAYE_HOST)
 
@@ -120,6 +123,9 @@ class Sync.Faye.Subscription
 class Sync.Pusher extends Sync.Adapter
 
   subscriptions: []
+
+  available: ->
+    !!window.Pusher
 
   connect: ->
     @client = new window.Pusher(Sync.PUSHER_API_KEY)
