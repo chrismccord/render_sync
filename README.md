@@ -1,4 +1,6 @@
-# Sync [![Build Status](https://travis-ci.org/chrismccord/sync.png?branch=master)](https://travis-ci.org/chrismccord/sync)
+# Sync [![Build Status](https://img.shields.io/travis/chrismccord/sync.svg)](https://travis-ci.org/chrismccord/sync) [![Code climate](https://img.shields.io/codeclimate/github/chrismccord/sync.svg)](https://codeclimate.com/github/chrismccord/sync) [![Code coverage](https://img.shields.io/codeclimate/coverage/github/chrismccord/sync.svg)](https://codeclimate.com/github/chrismccord/sync) [![gem version](https://img.shields.io/gem/v/sync.svg)](http://rubygems.org/gems/sync)
+
+
 > This started as a thought experiment that is growing into a viable option for realtime Rails apps without ditching
   the standard rails stack that we love and are so productive with for a heavy client side MVC framework.
 
