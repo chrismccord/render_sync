@@ -22,6 +22,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'sqlite3'
   s.add_development_dependency 'pry'
   s.add_development_dependency 'minitest', '< 5.0.0'
+  s.add_development_dependency 'codeclimate-test-reporter'
 
   s.required_rubygems_version = ">= 1.3.4"
 end
