@@ -2,13 +2,13 @@ module Sync
 
   module ViewHelpers
 
-    # Surround partial render in script tags, watching for 
+    # Surround partial render in script tags, watching for
     # sync_update and sync_destroy channels from pubsub server
     #
     # options - The Hash of options
     #   partial - The String partial filename without leading underscore
     #   resource - The ActiveModel resource
-    #   collection - The Array of ActiveModel resources to use in place of 
+    #   collection - The Array of ActiveModel resources to use in place of
     #                single resource
     #
     # Examples
@@ -45,12 +45,12 @@ module Sync
               partial.subscribe();
             });
           </script>
-        ".html_safe
+        ".squish.html_safe
         results << partial.render
         results << "
           <script type='text/javascript' data-sync-id='#{partial.selector_end}'>
           </script>
-        ".html_safe
+        ".squish.html_safe
       end
 
       safe_join(results)
@@ -64,16 +64,16 @@ module Sync
     #   resource - The ActiveModel resource
     #   scope - The ActiveModel resource to scope the new channel publishes to.
     #           Used for restricting new resource publishes to 'owner' models.
-    #           ie, current_user, project, group, etc. When excluded, listens 
+    #           ie, current_user, project, group, etc. When excluded, listens
     #           for global resource creates.
-    # 
+    #
     #   direction - The String/Symbol direction to insert rendered partials.
     #               One of :append, :prepend. Defaults to :append
     #
     # Examples
     #   <%= sync_new partial: 'todo', resource: Todo.new, scope: @project %>
     #   <%= sync_new partial: 'todo', resource: Todo.new, scope: @project, direction: :prepend %>
-    #  
+    #
     def sync_new(options = {})
       partial_name = options.fetch(:partial)
       scope        = options[:scope]
