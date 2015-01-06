@@ -1,18 +1,23 @@
+# Version 0.3.4 - January 6, 2015
+
+- `#squish` generated HTML
+- Fix bug when using `sync @resource` with the `:scope` option
+
 # Version 0.3.0 - March 3, 2014
 
-This release focuses on improving and extending the model DSL for setting up automatic syncing in advanced use cases. 
+This release focuses on improving and extending the model DSL for setting up automatic syncing in advanced use cases.
 
 - Adds the ability for advanced channel scoping
 
-  There were multiple feature requests asking for a way to sync differently scoped lists of the same model automatically and interdependently (e.g all todos of a user and all todos of a project). This can now be accomplished by explicitly defining scopes on the model via the new `sync_scope` method: 
+  There were multiple feature requests asking for a way to sync differently scoped lists of the same model automatically and interdependently (e.g all todos of a user and all todos of a project). This can now be accomplished by explicitly defining scopes on the model via the new `sync_scope` method:
 
   ```ruby
   class Todo < ActiveRecord::Base
     belongs_to :project
     belongs_to :user
-  
+
     sync :all
-  
+
     sync_scope :by_user(user), -> { where(user_id: user.id) }
     sync_scope :by_project(project), -> { where(project_id: project.id) }
   end
@@ -26,7 +31,7 @@ This release focuses on improving and extending the model DSL for setting up aut
   ```
 
   Please take a look at the docs and the readme for a more thorough explanation and examples on how to use this new feature.
-  
+
 - Adds the ability to explicitly update parent associations via `sync_touch`
 
 ####Breaking Changes:
@@ -43,9 +48,9 @@ This release focuses on improving and extending the model DSL for setting up aut
   ```ruby
   sync_destroy @comment, scope: @comment.todo
   ```
-  
+
   Why is this?
-  
+
   Before this version there was only a global destroy channel for every record, so an unscoped `sync_destroy` call was just enough to remove all partials from all subscribed clients when a record has been destroyed. As of 0.3.0 the destroy channel will be used not only to remove  partials when a record is destroyed, but also when partials for that record need to be added to/removed from different sets throughout the application when it is updated.
 
 - The `:scope` parameter for the `sync` method has been replaced with `:default_scope`. Make sure you update your code accordingly. If you're using the default scope feature, be sure to alway add the corresponding option to your views like this:
@@ -53,11 +58,11 @@ This release focuses on improving and extending the model DSL for setting up aut
   ```ruby
   class Todo < ActiveRecord::Base
     belongs_to :organization
-  
+
     sync :all, default_scope: :organization
   end
   ```
-  
+
   ```erb
   <%= sync partial: "todo", resource: @todos, default_scope: @organization %>
   <%= sync_new partial: "todo", resource: Todo.new, default_scope: @organization %>
@@ -70,22 +75,22 @@ This release focuses on improving and extending the model DSL for setting up aut
   class Todo < ActiveRecord::Base
     belongs_to :project
     belongs_to :user
-    
+
     sync :all, scope: :project
   end
   ```
-  
+
   New Syntax:
   ```ruby
   class Todo < ActiveRecord::Base
     belongs_to :project
     belongs_to :user
-    
+
     sync :all, default_scope: :project
     sync_touch :project, :user
   end
   ```
-  
+
   This will sync all partials of the parent model `project` and `user`, whenever a todo is created/updated/deleted.
 
 # Version 0.2.7 - Feburary 25, 2014
@@ -117,7 +122,7 @@ sync_new @todo, scope: [@project, :staff]
 
  - Add ability to refetch partial from server to render within session context, ref: https://github.com/chrismccord/sync/issues/44
 
-This solves the issues of syncing partials across different users when the partial requires the session's context (ie. current_user). 
+This solves the issues of syncing partials across different users when the partial requires the session's context (ie. current_user).
 
 Ex:
     View: Add `refetch: true` to sync calls, and place partial file in a 'refetch'
@@ -132,7 +137,7 @@ The partial file would be located in `app/views/sync/todos/refetch/_list_row.htm
 ```
 
 *Notes*
-While this approach works very well for the cases it's needed, syncing without refetching should be used unless refetching is absolutely necessary for performance reasons. For example, 
+While this approach works very well for the cases it's needed, syncing without refetching should be used unless refetching is absolutely necessary for performance reasons. For example,
 
 A sync update request is triggered on the server for a 'regular' sync'd partial with 100 listening clients:
 - number of http requests 1
