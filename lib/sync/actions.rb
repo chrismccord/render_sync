@@ -43,6 +43,7 @@ module Sync
     #           the channel to. Will be concatenated to an optional default_scope
     #
     def sync(resource, action, options = {})
+      scope = options[:scope]
       partial_name = options[:partial]
       resources = [resource].flatten
       messages = resources.collect do |resource|
@@ -51,7 +52,7 @@ module Sync
             partial.message(action)
           end
         else
-          all_partials(resource, sync_render_context).collect do |partial|
+          all_partials(resource, sync_render_context, scope).collect do |partial|
             partial.message(action)
           end
         end
@@ -82,7 +83,7 @@ module Sync
             partial.creator_for_scope(scope).message
           end
         else
-          all_partials(resource, sync_render_context).collect do |partial|
+          all_partials(resource, sync_render_context, scope).collect do |partial|
             partial.creator_for_scope(scope).message
           end
         end
