@@ -1,7 +1,5 @@
 class Sync::RefetchesController < ApplicationController
 
-  respond_to :json
-
   before_filter :require_valid_request
   before_filter :find_resource
   before_filter :find_authorized_partial
