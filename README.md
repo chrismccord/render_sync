@@ -518,3 +518,8 @@ def UsersController < ApplicationController
 end
 ```
 
+## Google detecting not found errors
+
+If you're using [Google Webmaster Tools](https://www.google.com/webmasters/) you may notice that Google detects *lots* of URLs it can't find on your site when using Sync.
+This is because Google now attempts to discover URLs in JavaScript and some JavaScript we generate looks a little like a URL to Google.
+You can [safely ignore](https://support.google.com/webmasters/answer/2409439?ctx=MCE&ctx=NF) this problem.
