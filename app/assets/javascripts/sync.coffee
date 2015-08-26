@@ -4,18 +4,11 @@ $ = jQuery
 
   ready: false
   readyQueue: []
-  FAYE_HOST: "<%= Sync.server %>"
-  PUSHER_API_KEY: "<%= Sync.api_key %>"
-  PUSHER_WS_HOST: "<%= Sync.pusher_ws_host %>"
-  PUSHER_WS_PORT: "<%= Sync.pusher_ws_port %>"
-  PUSHER_WSS_PORT: "<%= Sync.pusher_wss_port %>"
-  PUSHER_ENCRYPTED: <%= Sync.pusher_encrypted %>
-  CLIENT_ADAPTER: "<%= Sync.adapter %>"
 
   init: ->
-    return unless Sync[@CLIENT_ADAPTER]
-    @adapter = new Sync[@CLIENT_ADAPTER]
     $ =>
+      return unless SyncConfig? && Sync[SyncConfig.adapter]
+      @adapter ||= new Sync[SyncConfig.adapter]
       return if @isReady() || !@adapter.available()
       @ready = true
       @connect()
@@ -25,13 +18,14 @@ $ = jQuery
 
   # Handle Turbolinks teardown, unsubscribe from all channels before transition
   bindUnsubscribe: ->
-    $(document).bind "page:fetch", => @adapter.unsubscribeAll()
+    $(document).bind "page:before-change", => @adapter.unsubscribeAll()
     $(document).bind "page:restore", => @reexecuteScripts()
 
 
   # Handle Turbolinks cache restore, re-eval all sync script tags
   reexecuteScripts: ->
-    eval($(script).html()) for script in $("script[data-sync-id]")
+    for script in $("script[data-sync-id]")
+      eval($(script).html())
 
 
   onConnectFailure: (error) -> #noop
@@ -96,7 +90,7 @@ class Sync.Adapter
 
   subscribe: (channel, callback) ->
     @unsubscribeChannel(channel)
-    subscription = new Sync[Sync.CLIENT_ADAPTER].Subscription(@client, channel, callback)
+    subscription = new Sync[SyncConfig.adapter].Subscription(@client, channel, callback)
     @subscriptions.push(subscription)
     subscription
 
@@ -109,7 +103,7 @@ class Sync.Faye extends Sync.Adapter
     !!window.Faye
 
   connect: ->
-    @client = new window.Faye.Client(Sync.FAYE_HOST)
+    @client = new window.Faye.Client(SyncConfig.server)
 
   isConnected: -> @client?.getState() is "CONNECTED"
 
@@ -133,13 +127,13 @@ class Sync.Pusher extends Sync.Adapter
 
   connect: ->
     opts =
-      encrypted: Sync.PUSHER_ENCRYPTED
+      encrypted: SyncConfig.pusher_encrypted
 
-    opts.wsHost = Sync.PUSHER_WS_HOST if Sync.PUSHER_WS_HOST
-    opts.wsPort = Sync.PUSHER_WS_PORT if Sync.PUSHER_WS_PORT
-    opts.wssPort = Sync.PUSHER_WSS_PORT if Sync.PUSHER_WSS_PORT
+    opts.wsHost = SyncConfig.pusher_ws_host if SyncConfig.pusher_ws_host
+    opts.wsPort = SyncConfig.pusher_ws_port if SyncConfig.pusher_ws_port
+    opts.wssPort = SyncConfig.pusher_wss_port if SyncConfig.pusher_wss_port
 
-    @client = new window.Pusher(Sync.PUSHER_API_KEY, opts)
+    @client = new window.Pusher(SyncConfig.api_key, opts)
 
   isConnected: -> @client?.connection.state is "connected"
 
@@ -357,6 +351,5 @@ class Sync.PartialCreator
     )
     partial.subscribe()
     partial.insert(html)
-
 
 Sync.init()
