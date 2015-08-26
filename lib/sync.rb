@@ -106,6 +106,26 @@ module Sync
       config[:api_key]
     end
 
+    def pusher_api_scheme
+      config[:pusher_api_scheme]
+    end
+
+    def pusher_api_host
+      config[:pusher_api_host]
+    end
+
+    def pusher_api_port
+      config[:pusher_api_port]
+    end
+
+    def pusher_ws_host
+      config[:pusher_ws_host]
+    end
+
+    def pusher_ws_port
+      config[:pusher_ws_port]
+    end
+
     def reactor
       @reactor ||= Reactor.new
     end

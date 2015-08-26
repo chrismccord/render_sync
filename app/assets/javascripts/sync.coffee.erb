@@ -6,6 +6,8 @@ $ = jQuery
   readyQueue: []
   FAYE_HOST: "<%= Sync.server %>"
   PUSHER_API_KEY: "<%= Sync.api_key %>"
+  PUSHER_WS_HOST: "<%= Sync.pusher_ws_host %>"
+  PUSHER_WS_PORT: "<%= Sync.pusher_ws_port %>"
   CLIENT_ADAPTER: "<%= Sync.adapter %>"
 
   init: ->
@@ -128,7 +130,10 @@ class Sync.Pusher extends Sync.Adapter
     !!window.Pusher
 
   connect: ->
-    @client = new window.Pusher(Sync.PUSHER_API_KEY)
+    opts = {}
+    opts.wsHost = Sync.PUSHER_WS_HOST if Sync.PUSHER_WS_HOST
+    opts.wsPort = Sync.PUSHER_WS_PORT if Sync.PUSHER_WS_PORT
+    @client = new window.Pusher(Sync.PUSHER_API_KEY, opts)
 
   isConnected: -> @client?.connection.state is "connected"
 
