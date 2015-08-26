@@ -126,6 +126,18 @@ module Sync
       config[:pusher_ws_port]
     end
 
+    def pusher_wss_port
+      config[:pusher_wss_port]
+    end
+
+    def pusher_encrypted
+      if config[:pusher_encrypted].nil?
+        true
+      else
+        config[:pusher_encrypted]
+      end
+    end
+
     def reactor
       @reactor ||= Reactor.new
     end
