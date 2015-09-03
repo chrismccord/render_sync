@@ -43,9 +43,24 @@ module Sync
       @config || {}
     end
 
+    def config_json
+      @config_json ||= begin
+        {
+          server: server,
+          api_key: api_key,
+          pusher_ws_host: pusher_ws_host,
+          pusher_ws_port: pusher_ws_port,
+          pusher_wss_port: pusher_wss_port,
+          pusher_encrypted: pusher_encrypted,
+          adapter: adapter
+        }.reject { |k, v| v.nil? }.to_json
+      end
+    end
+
     # Resets the configuration to the default (empty hash)
     def reset_config
       @config = {}
+      @config_json = nil
     end
 
     # Loads the configuration from a given YAML file and environment (such as production)
