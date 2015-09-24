@@ -23,7 +23,7 @@ with:
 <%= sync partial: 'user_row', resource: @user %>
 ```
 
-Then update views realtime automatically with the `sync` DSL or with a with a simple `sync_update(@user)` in the controller without any extra javascript or
+Then update views realtime automatically with the `sync` DSL or with a simple `sync_update(@user)` in the controller without any extra javascript or
 configuration.
 
 In addition to real-time updates, Sync also provides:
