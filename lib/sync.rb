@@ -106,6 +106,10 @@ module Sync
       config[:api_key]
     end
 
+    def encryption_flag
+      config[:encryption] || false
+    end
+
     def reactor
       @reactor ||= Reactor.new
     end
@@ -125,4 +129,3 @@ module Sync
     end
   end
 end
-

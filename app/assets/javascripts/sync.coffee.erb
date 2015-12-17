@@ -7,6 +7,7 @@ $ = jQuery
   FAYE_HOST: "<%= Sync.server %>"
   PUSHER_API_KEY: "<%= Sync.api_key %>"
   CLIENT_ADAPTER: "<%= Sync.adapter %>"
+  ENCRYPTION_FLAG: "<%= Sync.encryption_flag %>"
 
   init: ->
     return unless Sync[@CLIENT_ADAPTER]
@@ -128,7 +129,7 @@ class Sync.Pusher extends Sync.Adapter
     !!window.Pusher
 
   connect: ->
-    @client = new window.Pusher(Sync.PUSHER_API_KEY)
+    @client = new window.Pusher(Sync.PUSHER_API_KEY, encrypted: Sync.ENCRYPTION_FLAG)
 
   isConnected: -> @client?.connection.state is "connected"
 
