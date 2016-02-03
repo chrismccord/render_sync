@@ -255,7 +255,7 @@ sync_touch :project, :user
 ### Syncing outside of the controller
 
 `Sync::Actions` can be included into any object wishing to perform sync
-publishes for a given resource. Instead of using the the controller as
+publishes for a given resource. Instead of using the controller as
 context for rendering, a Sync::Renderer instance is used. Since the Renderer
 is not part of the request/response/session, it has no knowledge of the
 current session (ie. current_user), so syncing from outside the controller
