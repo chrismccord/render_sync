@@ -1,3 +1,7 @@
+# Version 0.3.5 - January 6, 2015
+
+- Removed unnecessary call to `respond_to` since `responders` have been removed from Rails.
+
 # Version 0.3.4 - January 6, 2015
 
 - `#squish` generated HTML

@@ -23,7 +23,7 @@ with:
 <%= sync partial: 'user_row', resource: @user %>
 ```
 
-Then update views realtime automatically with the `sync` DSL or with a with a simple `sync_update(@user)` in the controller without any extra javascript or
+Then update views realtime automatically with the `sync` DSL or with a simple `sync_update(@user)` in the controller without any extra javascript or
 configuration.
 
 In addition to real-time updates, Sync also provides:
@@ -255,7 +255,7 @@ sync_touch :project, :user
 ### Syncing outside of the controller
 
 `Sync::Actions` can be included into any object wishing to perform sync
-publishes for a given resource. Instead of using the the controller as
+publishes for a given resource. Instead of using the controller as
 context for rendering, a Sync::Renderer instance is used. Since the Renderer
 is not part of the request/response/session, it has no knowledge of the
 current session (ie. current_user), so syncing from outside the controller
@@ -518,3 +518,8 @@ def UsersController < ApplicationController
 end
 ```
 
+## Google detecting not found errors
+
+If you're using [Google Webmaster Tools](https://www.google.com/webmasters/) you may notice that Google detects *lots* of URLs it can't find on your site when using Sync.
+This is because Google now attempts to discover URLs in JavaScript and some JavaScript we generate looks a little like a URL to Google.
+You can [safely ignore](https://support.google.com/webmasters/answer/2409439?ctx=MCE&ctx=NF) this problem.
