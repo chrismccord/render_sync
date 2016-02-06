@@ -43,9 +43,24 @@ module Sync
       @config || {}
     end
 
+    def config_json
+      @config_json ||= begin
+        {
+          server: server,
+          api_key: api_key,
+          pusher_ws_host: pusher_ws_host,
+          pusher_ws_port: pusher_ws_port,
+          pusher_wss_port: pusher_wss_port,
+          pusher_encrypted: pusher_encrypted,
+          adapter: adapter
+        }.reject { |k, v| v.nil? }.to_json
+      end
+    end
+
     # Resets the configuration to the default (empty hash)
     def reset_config
       @config = {}
+      @config_json = nil
     end
 
     # Loads the configuration from a given YAML file and environment (such as production)
@@ -106,8 +121,36 @@ module Sync
       config[:api_key]
     end
 
-    def encryption_flag
-      config[:encryption] || false
+    def pusher_api_scheme
+      config[:pusher_api_scheme]
+    end
+
+    def pusher_api_host
+      config[:pusher_api_host]
+    end
+
+    def pusher_api_port
+      config[:pusher_api_port]
+    end
+
+    def pusher_ws_host
+      config[:pusher_ws_host]
+    end
+
+    def pusher_ws_port
+      config[:pusher_ws_port]
+    end
+
+    def pusher_wss_port
+      config[:pusher_wss_port]
+    end
+
+    def pusher_encrypted
+      if config[:pusher_encrypted].nil?
+        true
+      else
+        config[:pusher_encrypted]
+      end
     end
 
     def reactor

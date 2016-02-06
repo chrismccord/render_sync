@@ -7,6 +7,18 @@ module Sync
         ::Pusher.app_id = Sync.app_id
         ::Pusher.key    = Sync.api_key
         ::Pusher.secret = Sync.auth_token
+
+        if Sync.pusher_api_scheme
+          ::Pusher.scheme = Sync.pusher_api_scheme
+        end
+
+        if Sync.pusher_api_host
+          ::Pusher.host = Sync.pusher_api_host
+        end
+
+        if Sync.pusher_api_port
+          ::Pusher.port = Sync.pusher_api_port
+        end
       end
 
       def batch_publish(*args)

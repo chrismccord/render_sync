@@ -72,10 +72,10 @@ $ rails g sync:install
 //= require sync
 ```
 
-#### 3) Add the pubsub adapter's javascript to your application layout `app/views/layouts/application.html.erb`
+#### 3) Add sync's configuration script to your application layout `app/views/layouts/application.html.erb`
 
 ```erb
-<%= javascript_include_tag Sync.adapter_javascript_url %>
+<%= include_sync_config %>
 ```
 
 #### 4) Configure your pubsub server (Faye or Pusher)

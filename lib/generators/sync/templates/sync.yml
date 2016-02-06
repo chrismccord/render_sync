@@ -13,7 +13,6 @@ development:
 #   api_key: "YOUR_PUSHER_API_KEY"
 #   auth_token: "YOUR_PUSHER_SECRET"
 #   adapter: "Pusher"
-#   encryption: true
 #   async: true
 
 # Disabled
