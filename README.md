@@ -93,10 +93,6 @@ rackup sync.ru -E production
 
 Set your configuration in the generated `config/sync.yml` file, using the Pusher adapter. No extra process/setup.
 
-#### Important: clear your asset cache
-
-Because Sync interpolates your configuration settings into its compiled JavaScript, you may need to clear the Rails asset cache before your changes are reflected. You can do so by running `rake assets:clobber` from the command line.
-
 ## Current Caveats
 The current implementation uses a DOM range query (jQuery's `nextUntil`) to match your partial's "element" in
 the DOM. The way this selector works requires your sync'd partial to be wrapped in a root level html tag for that partial file.
