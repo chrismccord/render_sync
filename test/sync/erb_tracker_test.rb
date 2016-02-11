@@ -1,7 +1,7 @@
 require_relative '../test_helper'
 require 'rails/all'
 require 'active_support/core_ext/array/access'
-require 'sync/erb_tracker'
+require 'render_sync/erb_tracker'
 
 describe RenderSync::ERBTracker do
   Template = Struct.new(:source)
