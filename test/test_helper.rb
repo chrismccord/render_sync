@@ -6,7 +6,7 @@ require 'yaml'
 require 'json'
 require 'pry'
 require 'codeclimate-test-reporter'
-require 'sync'
+
 CodeClimate::TestReporter.start
 
 require_relative 'em_minitest_spec'

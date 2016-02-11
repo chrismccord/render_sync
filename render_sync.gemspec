@@ -1,11 +1,11 @@
 Gem::Specification.new do |s|
-  s.name        = "sync"
+  s.name        = "render_sync"
   s.version     = "0.4.0"
   s.author      = "Chris McCord"
   s.email       = "chris@chrismccord.com"
-  s.homepage    = "http://github.com/chrismccord/sync"
+  s.homepage    = "http://github.com/chrismccord/render_sync"
   s.summary     = "Realtime Rails Partials"
-  s.description = "Sync turns your Rails partials realtime with automatic updates through Faye"
+  s.description = "RenderSync turns your Rails partials realtime with automatic updates through Faye"
   s.files       = Dir["{app,config,lib,test}/**/*", "[A-Z]*", "init.rb"] - ["Gemfile.lock"]
   s.require_path = "lib"
   s.licenses    = ['MIT']
