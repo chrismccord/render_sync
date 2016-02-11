@@ -1,14 +1,14 @@
 $ = jQuery
 
-@Sync =
+@RenderSync =
 
   ready: false
   readyQueue: []
 
   init: ->
     $ =>
-      return unless SyncConfig? && Sync[SyncConfig.adapter]
-      @adapter ||= new Sync[SyncConfig.adapter]
+      return unless RenderSyncConfig? && RenderSync[RenderSyncConfig.adapter]
+      @adapter ||= new RenderSync[RenderSyncConfig.adapter]
       return if @isReady() || !@adapter.available()
       @ready = true
       @connect()
@@ -60,18 +60,18 @@ $ = jQuery
   #
   # Examples
   #   partialName 'list_row', resourceName 'todo', order of lookup:
-  #   Sync.TodoListRow
-  #   Sync.ListRow
-  #   Sync.View
+  #   RenderSync.TodoListRow
+  #   RenderSync.ListRow
+  #   RenderSync.View
   #
-  # Defaults to Sync.View if no custom view class has been defined
+  # Defaults to RenderSync.View if no custom view class has been defined
   viewClassFromPartialName: (partialName, resourceName) ->
-    Sync[@camelize("#{resourceName}_#{partialName}")] ?
-    Sync[@camelize(partialName)] ?
-    Sync.View
+    RenderSync[@camelize("#{resourceName}_#{partialName}")] ?
+    RenderSync[@camelize(partialName)] ?
+    RenderSync.View
 
 
-class Sync.Adapter
+class RenderSync.Adapter
 
   subscriptions: []
 
@@ -90,12 +90,12 @@ class Sync.Adapter
 
   subscribe: (channel, callback) ->
     @unsubscribeChannel(channel)
-    subscription = new Sync[SyncConfig.adapter].Subscription(@client, channel, callback)
+    subscription = new RenderSync[RenderSyncConfig.adapter].Subscription(@client, channel, callback)
     @subscriptions.push(subscription)
     subscription
 
 
-class Sync.Faye extends Sync.Adapter
+class RenderSync.Faye extends RenderSync.Adapter
 
   subscriptions: []
 
@@ -103,12 +103,12 @@ class Sync.Faye extends Sync.Adapter
     !!window.Faye
 
   connect: ->
-    @client = new window.Faye.Client(SyncConfig.server)
+    @client = new window.Faye.Client(RenderSyncConfig.server)
 
   isConnected: -> @client?.getState() is "CONNECTED"
 
 
-class Sync.Faye.Subscription
+class RenderSync.Faye.Subscription
 
   constructor: (@client, channel, callback) ->
     @channel = channel
@@ -118,7 +118,7 @@ class Sync.Faye.Subscription
     @fayeSub.cancel()
 
 
-class Sync.Pusher extends Sync.Adapter
+class RenderSync.Pusher extends RenderSync.Adapter
 
   subscriptions: []
 
@@ -127,24 +127,24 @@ class Sync.Pusher extends Sync.Adapter
 
   connect: ->
     opts =
-      encrypted: SyncConfig.pusher_encrypted
+      encrypted: RenderSyncConfig.pusher_encrypted
 
-    opts.wsHost = SyncConfig.pusher_ws_host if SyncConfig.pusher_ws_host
-    opts.wsPort = SyncConfig.pusher_ws_port if SyncConfig.pusher_ws_port
-    opts.wssPort = SyncConfig.pusher_wss_port if SyncConfig.pusher_wss_port
+    opts.wsHost = RenderSyncConfig.pusher_ws_host if RenderSyncConfig.pusher_ws_host
+    opts.wsPort = RenderSyncConfig.pusher_ws_port if RenderSyncConfig.pusher_ws_port
+    opts.wssPort = RenderSyncConfig.pusher_wss_port if RenderSyncConfig.pusher_wss_port
 
-    @client = new window.Pusher(SyncConfig.api_key, opts)
+    @client = new window.Pusher(RenderSyncConfig.api_key, opts)
 
   isConnected: -> @client?.connection.state is "connected"
 
   subscribe: (channel, callback) ->
     @unsubscribeChannel(channel)
-    subscription = new Sync.Pusher.Subscription(@client, channel, callback)
+    subscription = new RenderSync.Pusher.Subscription(@client, channel, callback)
     @subscriptions.push(subscription)
     subscription
 
 
-class Sync.Pusher.Subscription
+class RenderSync.Pusher.Subscription
   constructor: (@client, channel, callback) ->
     @channel = channel
 
@@ -155,7 +155,7 @@ class Sync.Pusher.Subscription
     @client.unsubscribe(@channel) if @client.channel(@channel)?
 
 
-class Sync.View
+class RenderSync.View
 
   removed: false
 
@@ -202,7 +202,7 @@ class Sync.View
 
 
 
-class Sync.Partial
+class RenderSync.Partial
 
   attributes:
     name: null
@@ -236,8 +236,8 @@ class Sync.Partial
     @$start = $("[data-sync-id='#{@selectorStart}']")
     @$end   = $("[data-sync-id='#{@selectorEnd}']")
     @$el    = @$start.nextUntil(@$end)
-    @view   = new (Sync.viewClassFromPartialName(@name, @resourceName))(@$el, @name)
-    @adapter = Sync.adapter
+    @view   = new (RenderSync.viewClassFromPartialName(@name, @resourceName))(@$el, @name)
+    @adapter = RenderSync.adapter
 
 
   subscribe: ->
@@ -287,7 +287,7 @@ class Sync.Partial
       success: (data) -> callback(data.html)
 
 
-class Sync.PartialCreator
+class RenderSync.PartialCreator
 
   attributes:
     name: null
@@ -311,7 +311,7 @@ class Sync.PartialCreator
   constructor: (attributes = {}) ->
     @[key] = attributes[key] ? defaultValue for key, defaultValue of @attributes
     @$el = $("[data-sync-id='#{@selector}']")
-    @adapter = Sync.adapter
+    @adapter = RenderSync.adapter
 
 
   subscribe: ->
@@ -338,7 +338,7 @@ class Sync.PartialCreator
       <script type='text/javascript' data-sync-el-placeholder></script>
       <script type='text/javascript' data-sync-id='#{selectorEnd}'></script>
     """
-    partial = new Sync.Partial(
+    partial = new RenderSync.Partial(
       name: @name
       resourceName: @resourceName
       resourceId: resourceId
@@ -352,4 +352,4 @@ class Sync.PartialCreator
     partial.subscribe()
     partial.insert(html)
 
-Sync.init()
+RenderSync.init()

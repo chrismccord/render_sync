@@ -1,4 +1,4 @@
-module Sync
+module RenderSync
 
   module ControllerHelpers
 
@@ -18,7 +18,7 @@ module Sync
     private
 
     def enable_sync
-      Sync::Model.enable(sync_render_context) do
+      RenderSync::Model.enable(sync_render_context) do
         yield
       end
     end

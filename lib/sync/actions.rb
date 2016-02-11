@@ -1,4 +1,4 @@
-module Sync
+module RenderSync
   module Actions
 
     # Render all sync'd partials for resource to string and publish update action
@@ -8,7 +8,7 @@ module Sync
     # options - The Hash of options
     #   default_scope - The ActiveModel resource to scope the update channel to
     #   scope - Either a String, a symbol, an instance of ActiveModel or
-    #           Sync::Scope or an Array containing a combination to scope
+    #           RenderSync::Scope or an Array containing a combination to scope
     #           the update channel to. Will be concatenated to an optional
     #           default_scope
     #
@@ -23,7 +23,7 @@ module Sync
     # options - The Hash of options
     #   default_scope - The ActiveModel resource to scope the update channel to
     #   scope - Either a String, a symbol, an instance of ActiveModel or
-    #           Sync::Scope or an Array containing a combination to scope
+    #           RenderSync::Scope or an Array containing a combination to scope
     #           the destroy channel to. Will be concatenated to an optional
     #           default_scope
     #
@@ -39,7 +39,7 @@ module Sync
     # options - The Hash of options
     #   default_scope - The ActiveModel resource to scope the action channel to
     #   scope - Either a String, a symbol, an instance of ActiveModel or
-    #           Sync::Scope or an Array containing a combination to scope
+    #           RenderSync::Scope or an Array containing a combination to scope
     #           the channel to. Will be concatenated to an optional default_scope
     #
     def sync(resource, action, options = {})
@@ -58,7 +58,7 @@ module Sync
         end
       end
 
-      Sync.client.batch_publish(messages.flatten)
+      RenderSync.client.batch_publish(messages.flatten)
     end
 
     # Render all sync'd partials for resource to string and publish
@@ -69,7 +69,7 @@ module Sync
     # options - The Hash of options
     #   default_scope - The ActiveModel resource to scope the new channel to
     #   scope - Either a String, a symbol, an instance of ActiveModel or
-    #           Sync::Scope or an Array containing any combination to scope
+    #           RenderSync::Scope or an Array containing any combination to scope
     #           the new channel to. Will be concatenated to an optional
     #           default_scope
     #
@@ -89,7 +89,7 @@ module Sync
         end
       end
 
-      Sync.client.batch_publish(messages.flatten)
+      RenderSync.client.batch_publish(messages.flatten)
     end
 
     private

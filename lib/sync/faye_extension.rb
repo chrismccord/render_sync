@@ -1,4 +1,4 @@
-module Sync
+module RenderSync
   class FayeExtension
 
     def incoming(message, callback)
@@ -39,7 +39,7 @@ module Sync
 
     def message_authenticated?(message)
       !(message['channel'] !~ %r{^/meta/} && 
-        message['ext']['auth_token'] != Sync.auth_token)
+        message['ext']['auth_token'] != RenderSync.auth_token)
     end
   end
 end

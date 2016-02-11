@@ -1,11 +1,11 @@
-module Sync
+module RenderSync
   class Partial
     attr_accessor :name, :resource, :context
 
     def self.all(model, context, scope = nil)
       resource = Resource.new(model, scope)
 
-      Dir["#{Sync.views_root}/#{resource.plural_name}/_*.*"].map do |partial|
+      Dir["#{RenderSync.views_root}/#{resource.plural_name}/_*.*"].map do |partial|
         partial_name = File.basename(partial)
         Partial.new(partial_name[1...partial_name.index('.')], resource.model, scope, context)
       end
@@ -38,7 +38,7 @@ module Sync
     end
 
     def message(action)
-      Sync.client.build_message channel_for_action(action),
+      RenderSync.client.build_message channel_for_action(action),
         html: (render_to_string unless action.to_s == "destroy")
     end
 

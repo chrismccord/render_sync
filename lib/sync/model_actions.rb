@@ -1,4 +1,4 @@
-module Sync
+module RenderSync
   module ModelActions
     # Set up instance variable holding the collected sync actions 
     # to be published later on.
@@ -12,11 +12,11 @@ module Sync
       base.class_eval do
         @sync_scope_definitions ||= {}
         
-        before_create  :prepare_sync_actions, if: -> { Sync::Model.enabled? }
-        before_update  :prepare_sync_actions, if: -> { Sync::Model.enabled? }
-        before_destroy :prepare_sync_actions, if: -> { Sync::Model.enabled? }
+        before_create  :prepare_sync_actions, if: -> { RenderSync::Model.enabled? }
+        before_update  :prepare_sync_actions, if: -> { RenderSync::Model.enabled? }
+        before_destroy :prepare_sync_actions, if: -> { RenderSync::Model.enabled? }
         
-        after_commit   :publish_sync_actions, if: -> { Sync::Model.enabled? }
+        after_commit   :publish_sync_actions, if: -> { RenderSync::Model.enabled? }
       end
     end
     
@@ -28,7 +28,7 @@ module Sync
     private
 
     def sync_render_context
-      Sync::Model.context || super
+      RenderSync::Model.context || super
     end
     
     def prepare_sync_actions
@@ -53,7 +53,7 @@ module Sync
     end
     
     def sync_render_context
-      Sync::Model.context || super
+      RenderSync::Model.context || super
     end
     
   end

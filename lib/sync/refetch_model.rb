@@ -1,4 +1,4 @@
-module Sync
+module RenderSync
   class RefetchModel
 
     def self.find_by_class_name_and_id(resource_name, id)      

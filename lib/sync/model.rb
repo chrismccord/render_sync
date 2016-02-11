@@ -1,4 +1,4 @@
-module Sync
+module RenderSync
   module Model
 
     def self.enabled?
@@ -36,7 +36,7 @@ module Sync
       def sync(*actions)
         include ModelActions unless include?(ModelActions)
         include ModelChangeTracking unless include?(ModelChangeTracking)
-        include ModelSyncing
+        include ModelRenderSyncing
         
         if actions.last.is_a? Hash
           @sync_default_scope = actions.last.fetch :default_scope
@@ -46,15 +46,15 @@ module Sync
         actions.flatten!
 
         if actions.include? :create
-          after_create  :prepare_sync_create,  if: -> { Sync::Model.enabled? }
+          after_create  :prepare_sync_create,  if: -> { RenderSync::Model.enabled? }
         end
         
         if actions.include? :update
-          after_update  :prepare_sync_update,  if: -> { Sync::Model.enabled? }
+          after_update  :prepare_sync_update,  if: -> { RenderSync::Model.enabled? }
         end
         
         if actions.include? :destroy
-          after_destroy :prepare_sync_destroy, if: -> { Sync::Model.enabled? }
+          after_destroy :prepare_sync_destroy, if: -> { RenderSync::Model.enabled? }
         end
 
       end
@@ -128,10 +128,10 @@ module Sync
           raise ArgumentError, "invalid scope name '#{name}'. Already defined on #{self.name}"
         end
         
-        @sync_scope_definitions[name] = Sync::ScopeDefinition.new(self, name, lambda)
+        @sync_scope_definitions[name] = RenderSync::ScopeDefinition.new(self, name, lambda)
         
         singleton_class.send(:define_method, name) do |*args|
-          Sync::Scope.new_from_args(@sync_scope_definitions[name], args)
+          RenderSync::Scope.new_from_args(@sync_scope_definitions[name], args)
         end        
       end
       
@@ -157,9 +157,9 @@ module Sync
         
           @sync_touches ||= []
         
-          after_create   :prepare_sync_touches, if: -> { Sync::Model.enabled? }
-          after_update   :prepare_sync_touches, if: -> { Sync::Model.enabled? }
-          after_destroy  :prepare_sync_touches, if: -> { Sync::Model.enabled? }
+          after_create   :prepare_sync_touches, if: -> { RenderSync::Model.enabled? }
+          after_update   :prepare_sync_touches, if: -> { RenderSync::Model.enabled? }
+          after_destroy  :prepare_sync_touches, if: -> { RenderSync::Model.enabled? }
         end
 
         options = args.extract_options!

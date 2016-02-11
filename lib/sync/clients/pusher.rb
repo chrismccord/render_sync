@@ -1,23 +1,23 @@
-module Sync
+module RenderSync
   module Clients
     class Pusher
 
       def setup
         require 'pusher'
-        ::Pusher.app_id = Sync.app_id
-        ::Pusher.key    = Sync.api_key
-        ::Pusher.secret = Sync.auth_token
+        ::Pusher.app_id = RenderSync.app_id
+        ::Pusher.key    = RenderSync.api_key
+        ::Pusher.secret = RenderSync.auth_token
 
-        if Sync.pusher_api_scheme
-          ::Pusher.scheme = Sync.pusher_api_scheme
+        if RenderSync.pusher_api_scheme
+          ::Pusher.scheme = RenderSync.pusher_api_scheme
         end
 
-        if Sync.pusher_api_host
-          ::Pusher.host = Sync.pusher_api_host
+        if RenderSync.pusher_api_host
+          ::Pusher.host = RenderSync.pusher_api_host
         end
 
-        if Sync.pusher_api_port
-          ::Pusher.port = Sync.pusher_api_port
+        if RenderSync.pusher_api_port
+          ::Pusher.port = RenderSync.pusher_api_port
         end
       end
 
@@ -55,7 +55,7 @@ module Sync
         end
 
         def publish
-          if Sync.async?
+          if RenderSync.async?
             publish_asynchronous
           else
             publish_synchronous
@@ -67,7 +67,7 @@ module Sync
         end
 
         def publish_asynchronous
-          Sync.reactor.perform do
+          RenderSync.reactor.perform do
             ::Pusher.trigger_async([channel], 'sync', data)
           end
         end

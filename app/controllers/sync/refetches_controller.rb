@@ -1,4 +1,4 @@
-class Sync::RefetchesController < ApplicationController
+class RenderSync::RefetchesController < ApplicationController
 
   before_filter :require_valid_request
   before_filter :find_resource
@@ -35,14 +35,14 @@ class Sync::RefetchesController < ApplicationController
   end
 
   def find_resource
-    @resource = Sync::RefetchModel.find_by_class_name_and_id(
+    @resource = RenderSync::RefetchModel.find_by_class_name_and_id(
       params[:resource_name],
       params[:resource_id]
     ) || render_bad_request
   end
 
   def find_authorized_partial
-    @partial = Sync::RefetchPartial.find_by_authorized_resource(
+    @partial = RenderSync::RefetchPartial.find_by_authorized_resource(
       @resource,
       params[:partial_name],
       self,

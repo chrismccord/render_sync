@@ -1,4 +1,4 @@
-module Sync
+module RenderSync
   class PartialCreator
     attr_accessor :name, :resource, :context, :partial
 
@@ -26,7 +26,7 @@ module Sync
     end
 
     def message
-      Sync.client.build_message(channel,
+      RenderSync.client.build_message(channel,
         html: partial.render_to_string,
         resourceId: resource.id,
         authToken: partial.auth_token,

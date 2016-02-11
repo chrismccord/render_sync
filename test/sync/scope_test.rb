@@ -6,12 +6,12 @@ require_relative '../models/project'
 require_relative '../models/group'
 require_relative '../models/todo'
 
-describe Sync::Scope do
+describe RenderSync::Scope do
   include TestHelper
 
   describe '#initialize' do
-    it 'return an Sync::Scope instance' do
-      assert_kind_of Sync::Scope, User.with_group_id(5)
+    it 'return an RenderSync::Scope instance' do
+      assert_kind_of RenderSync::Scope, User.with_group_id(5)
     end
 
     it 'raises an argument error with an invalid param (float)' do
@@ -20,20 +20,20 @@ describe Sync::Scope do
       end
     end
 
-    it 'returns an Sync::Scope instance and sets instance variables correctly' do
+    it 'returns an RenderSync::Scope instance and sets instance variables correctly' do
       scope = User.with_group_id(5)
-      assert_kind_of Sync::Scope, scope
+      assert_kind_of RenderSync::Scope, scope
       assert_equal scope.args, [5]
       assert_equal scope.scope_definition, User.sync_scope_definitions[:with_group_id]
     end
   end
   
   describe '#new_from_model' do
-    it 'returns an Sync::Scope instance and sets instance variables correctly' do
+    it 'returns an RenderSync::Scope instance and sets instance variables correctly' do
       scope_definition = User.sync_scope_definitions[:with_group_id]
       user = User.create(group_id: 3)
-      scope = Sync::Scope.new_from_model(scope_definition, user)
-      assert_kind_of Sync::Scope, scope
+      scope = RenderSync::Scope.new_from_model(scope_definition, user)
+      assert_kind_of RenderSync::Scope, scope
       assert_equal scope.args, [3]
       assert_equal scope.scope_definition, scope_definition
     end
@@ -55,7 +55,7 @@ describe Sync::Scope do
     it 'returns false for a relation that throws an exception' do
       scope_definition = User.sync_scope_definitions[:in_group]
       user = User.create(group: nil)
-      scope = Sync::Scope.new_from_model(scope_definition, user)
+      scope = RenderSync::Scope.new_from_model(scope_definition, user)
       assert_equal false, scope.valid?
     end
   end

@@ -1,4 +1,4 @@
-module Sync
+module RenderSync
   module Clients
     class Faye
 
@@ -30,7 +30,7 @@ module Sync
         attr_accessor :channel, :data
 
         def self.batch_publish(messages)
-          if Sync.async?
+          if RenderSync.async?
             batch_publish_asynchronous(messages)
           else
             batch_publish_synchronous(messages)
@@ -39,14 +39,14 @@ module Sync
 
         def self.batch_publish_synchronous(messages)
           Net::HTTP.post_form(
-            URI.parse(Sync.server), 
+            URI.parse(RenderSync.server), 
             message: batch_messages_query_hash(messages).to_json
           )
         end
 
         def self.batch_publish_asynchronous(messages)
-          Sync.reactor.perform do
-            EM::HttpRequest.new(Sync.server).post(body: {
+          RenderSync.reactor.perform do
+            EM::HttpRequest.new(RenderSync.server).post(body: {
               message: batch_messages_query_hash(messages).to_json
             })
           end
@@ -56,7 +56,7 @@ module Sync
           {
             channel: "/batch_publish",
             data: messages.collect(&:to_hash),
-            ext: { auth_token: Sync.auth_token }
+            ext: { auth_token: RenderSync.auth_token }
           }
         end
 
@@ -70,7 +70,7 @@ module Sync
             channel: channel,
             data: data,
             ext: {
-              auth_token: Sync.auth_token
+              auth_token: RenderSync.auth_token
             }
           }
         end
@@ -80,7 +80,7 @@ module Sync
         end
 
         def publish
-          if Sync.async?
+          if RenderSync.async?
             publish_asynchronous
           else
             publish_synchronous
@@ -88,12 +88,12 @@ module Sync
         end
 
         def publish_synchronous
-          Net::HTTP.post_form URI.parse(Sync.server), message: to_json
+          Net::HTTP.post_form URI.parse(RenderSync.server), message: to_json
         end
 
         def publish_asynchronous
-          Sync.reactor.perform do
-            EM::HttpRequest.new(Sync.server).post(body: {
+          RenderSync.reactor.perform do
+            EM::HttpRequest.new(RenderSync.server).post(body: {
               message: self.to_json
             })
           end

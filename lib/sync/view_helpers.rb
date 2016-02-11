@@ -1,4 +1,4 @@
-module Sync
+module RenderSync
 
   module ViewHelpers
 
@@ -17,7 +17,7 @@ module Sync
     #
     def sync(options = {})
       collection   = options[:collection] || [options.fetch(:resource)]
-      scope        = options[:channel] || options[:scope] || (collection.is_a?(Sync::Scope) ? collection : nil)
+      scope        = options[:channel] || options[:scope] || (collection.is_a?(RenderSync::Scope) ? collection : nil)
       partial_name = options.fetch(:partial, scope)
       refetch      = options.fetch(:refetch, false)
 
@@ -30,8 +30,8 @@ module Sync
         end
         results << "
           <script type='text/javascript' data-sync-id='#{partial.selector_start}'>
-            Sync.onReady(function(){
-              var partial = new Sync.Partial({
+            RenderSync.onReady(function(){
+              var partial = new RenderSync.Partial({
                 name:           '#{partial.name}',
                 resourceName:   '#{partial.resource.name}',
                 resourceId:     '#{resource.id}',
@@ -79,7 +79,7 @@ module Sync
       scope        = options[:scope]
       direction    = options.fetch :direction, 'append'
       refetch      = options.fetch(:refetch, false)
-      resource     = scope.is_a?(Sync::Scope) ? scope.new : options.fetch(:resource)
+      resource     = scope.is_a?(RenderSync::Scope) ? scope.new : options.fetch(:resource)
 
       if refetch
         creator = RefetchPartialCreator.new(partial_name, resource, scope, self)
@@ -88,8 +88,8 @@ module Sync
       end
       "
         <script type='text/javascript' data-sync-id='#{creator.selector}'>
-          Sync.onReady(function(){
-            var creator = new Sync.PartialCreator({
+          RenderSync.onReady(function(){
+            var creator = new RenderSync.PartialCreator({
               name:         '#{partial_name}',
               resourceName: '#{creator.resource.name}',
               channel:      '#{creator.channel}',

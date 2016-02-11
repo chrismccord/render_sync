@@ -4,10 +4,10 @@ require 'rails/all'
 
 setup_database
 
-describe Sync::Model do
+describe RenderSync::Model do
 
   it 'publishes record (create/update/destroy) to main new channel' do
-    Sync::Model.enable do
+    RenderSync::Model.enable do
       user = UserWithProtectedAttributes.new
 
       # Create

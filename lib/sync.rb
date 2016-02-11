@@ -34,7 +34,7 @@ if defined? Rails
   require 'sync/engine'
 end
 
-module Sync
+module RenderSync
 
   class << self
     attr_accessor :config, :client, :logger
@@ -80,13 +80,13 @@ module Sync
 
     def setup_client
       raise ArgumentError, "auth_token missing" if config[:auth_token].nil?
-      @client = Sync::Clients.const_get(adapter).new
+      @client = RenderSync::Clients.const_get(adapter).new
       @client.setup
     end
 
     def setup_dummy_client
       config[:auth_token] = 'dummy_auth_token'
-      @client = Sync::Clients::Dummy.new
+      @client = RenderSync::Clients::Dummy.new
     end
 
     def setup_logger

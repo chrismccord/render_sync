@@ -1,4 +1,4 @@
-module Sync
+module RenderSync
 
   class Channel
 
@@ -11,13 +11,13 @@ module Sync
     def signature
       OpenSSL::HMAC.hexdigest(
         OpenSSL::Digest.new('sha1'),
-        Sync.auth_token,
+        RenderSync.auth_token,
         self.name
       )
     end
 
     def to_s
-      Sync.client.normalize_channel(self.signature)
+      RenderSync.client.normalize_channel(self.signature)
     end
   end
 end

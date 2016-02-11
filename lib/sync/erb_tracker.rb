@@ -1,4 +1,4 @@
-module Sync
+module RenderSync
   tracker_class = nil
   begin
     require 'action_view/dependency_tracker'

@@ -1,4 +1,4 @@
-module Sync
+module RenderSync
   class Reactor
     include MonitorMixin
 

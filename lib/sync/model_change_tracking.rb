@@ -1,11 +1,11 @@
-module Sync
+module RenderSync
   module ModelChangeTracking
     private
     # Set up callback to store record and sync scope states prior
     # the update action
     def self.included(base)
       base.class_eval do
-        before_update :store_state_before_update, if: -> { Sync::Model.enabled? }
+        before_update :store_state_before_update, if: -> { RenderSync::Model.enabled? }
       end
     end
     
@@ -28,7 +28,7 @@ module Sync
       
       @scopes_before_update = {}
       sync_scope_definitions.each do |definition|
-        scope = Sync::Scope.new_from_model(definition, record)
+        scope = RenderSync::Scope.new_from_model(definition, record)
         @scopes_before_update[definition.name] = { 
           scope: scope, 
           contains_record: scope.contains?(record) 
@@ -74,7 +74,7 @@ module Sync
     end
     
     def scope_after_update(definition)
-      Sync::Scope.new_from_model(definition, record_after_update)
+      RenderSync::Scope.new_from_model(definition, record_after_update)
     end
     
     def old_record_in_old_scope?(definition)

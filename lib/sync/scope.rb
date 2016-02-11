@@ -1,4 +1,4 @@
-module Sync
+module RenderSync
   class Scope
     attr_accessor :scope_definition, :args, :valid
     

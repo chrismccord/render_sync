@@ -1,4 +1,4 @@
-module Sync
+module RenderSync
   class Action
     include Actions
     

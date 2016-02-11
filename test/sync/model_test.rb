@@ -4,31 +4,31 @@ require 'rails/all'
 
 setup_database
 
-describe Sync::Model do
+describe RenderSync::Model do
 
   it 'can is disabled by default' do
-    refute Sync::Model.enabled?
+    refute RenderSync::Model.enabled?
   end
 
   it 'can be enabled and disabled' do
-    Sync::Model.enable!
-    assert Sync::Model.enabled?
+    RenderSync::Model.enable!
+    assert RenderSync::Model.enabled?
 
-    Sync::Model.disable!
-    refute Sync::Model.enabled?
+    RenderSync::Model.disable!
+    refute RenderSync::Model.enabled?
   end
 
   it 'can be given a block to have things enabled in' do
-    Sync::Model.enable do
-      assert Sync::Model.enabled?
+    RenderSync::Model.enable do
+      assert RenderSync::Model.enabled?
     end
 
-    refute Sync::Model.enabled?
+    refute RenderSync::Model.enabled?
   end
 
   describe 'syncing of model changes to all listening channels' do
     it 'publishes record (create/update/destroy) to main new channel' do
-      Sync::Model.enable do
+      RenderSync::Model.enable do
         user = UserWithoutScopes.new
 
         # Create
@@ -58,7 +58,7 @@ describe Sync::Model do
     end
 
     it 'publishes record with default scope to scope channel and parent channel' do
-      Sync::Model.enable do
+      RenderSync::Model.enable do
 
         # Create
         group = Group.create!
@@ -93,7 +93,7 @@ describe Sync::Model do
     end
 
     it 'publishes record with simple named sync scope' do
-      Sync::Model.enable do
+      RenderSync::Model.enable do
 
         # Create user not in scope 'old' (age > 90)
         user = UserWithSimpleScope.create!(age: 85)
@@ -163,7 +163,7 @@ describe Sync::Model do
     end
 
     it 'publishes record with a named sync scope that takes arguments' do
-      Sync::Model.enable do
+      RenderSync::Model.enable do
 
         # Create user not in scope 'in_group'
         group1 = Group.create
@@ -210,7 +210,7 @@ describe Sync::Model do
 
   describe "touching associated records explicitly" do
     it 'unsyncd user touches single association if configured' do
-      Sync::Model.enable do
+      RenderSync::Model.enable do
         group1 = Group.create
         group2 = Group.create
         user = UserJustTouchingGroup.create!(group: group1)
@@ -245,7 +245,7 @@ describe Sync::Model do
     end
 
     it 'syncd user touches single association if configured' do
-      Sync::Model.enable do
+      RenderSync::Model.enable do
         group1 = Group.create
         group2 = Group.create
         user = UserTouchingGroup.create!(group: group1)
@@ -280,7 +280,7 @@ describe Sync::Model do
     end
 
     it 'touches multiple associations if configured' do
-      Sync::Model.enable do
+      RenderSync::Model.enable do
         group = Group.create
         project = Project.create
         user = UserTouchingGroupAndProject.create!(group: group, project: project)

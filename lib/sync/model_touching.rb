@@ -1,4 +1,4 @@
-module Sync
+module RenderSync
   module ModelTouching
 
     private

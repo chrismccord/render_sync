@@ -1,10 +1,10 @@
-module Sync
+module RenderSync
   class RefetchPartial < Partial
 
     def self.all(model, context, scope = nil)
       resource = Resource.new(model)
 
-      Dir["#{Sync.views_root}/#{resource.plural_name}/refetch/_*.*"].map do |partial|
+      Dir["#{RenderSync.views_root}/#{resource.plural_name}/refetch/_*.*"].map do |partial|
         partial_name = File.basename(partial)
         RefetchPartial.new(partial_name[1...partial_name.index('.')], resource.model, scope, context)
       end
@@ -13,7 +13,7 @@ module Sync
     def self.find(model, partial_name, context)
       resource = Resource.new(model)
       plural_name = resource.plural_name
-      partial = Dir["#{Sync.views_root}/#{plural_name}/refetch/_#{partial_name}.*"].first
+      partial = Dir["#{RenderSync.views_root}/#{plural_name}/refetch/_#{partial_name}.*"].first
       return unless partial
       RefetchPartial.new(partial_name, resource.model, nil, context)
     end
@@ -26,7 +26,7 @@ module Sync
     end
 
     def message(action)
-      Sync.client.build_message channel_for_action(action), refetch: true
+      RenderSync.client.build_message channel_for_action(action), refetch: true
     end
 
     def creator_for_scope(scope)

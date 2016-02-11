@@ -1,4 +1,4 @@
-module Sync
+module RenderSync
   class RefetchPartialCreator < PartialCreator
 
     def initialize(name, resource, scoped_resource, context)
@@ -7,7 +7,7 @@ module Sync
     end
 
     def message
-      Sync.client.build_message(channel,
+      RenderSync.client.build_message(channel,
         refetch: true,
         resourceId: resource.id,
         authToken: partial.auth_token,

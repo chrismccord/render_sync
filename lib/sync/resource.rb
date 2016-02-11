@@ -1,6 +1,6 @@
 require 'pathname'
 
-module Sync
+module RenderSync
   class Resource
     attr_accessor :model, :scopes
 
@@ -8,7 +8,7 @@ module Sync
     #
     # model - The ActiveModel instace for this Resource
     # scopes - The optional scopes to prefix polymorphic paths with.
-    #          Can be a Symbol/String, a parent model or an Sync::Scope
+    #          Can be a Symbol/String, a parent model or an RenderSync::Scope
     #          or an Array with any combination.
     #
     # Examples
@@ -83,7 +83,7 @@ module Sync
       path = Pathname.new('/')
       unless scopes.nil?
         paths = scopes.map do |scope|
-          if scope.is_a?(Sync::Scope)
+          if scope.is_a?(RenderSync::Scope)
             scope.polymorphic_path.relative_path_from(path)
           elsif scope.class.respond_to? :model_name
             Resource.new(scope).polymorphic_path.relative_path_from(path)

@@ -1,4 +1,4 @@
-module Sync
+module RenderSync
   module Clients
     class Dummy
       def method_missing(*args, &block)

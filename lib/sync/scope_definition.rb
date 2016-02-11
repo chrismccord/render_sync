@@ -1,4 +1,4 @@
-module Sync
+module RenderSync
   class ScopeDefinition
     attr_accessor :klass, :name, :lambda, :parameters, :args
     

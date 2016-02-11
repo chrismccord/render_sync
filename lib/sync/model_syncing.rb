@@ -1,5 +1,5 @@
-module Sync
-  module ModelSyncing
+module RenderSync
+  module ModelRenderSyncing
     
     private
 
@@ -7,7 +7,7 @@ module Sync
       add_sync_action(:new, self, default_scope: sync_default_scope)
       
       sync_scope_definitions.each do |definition|
-        scope = Sync::Scope.new_from_model(definition, self)
+        scope = RenderSync::Scope.new_from_model(definition, self)
         if scope.contains?(self)
           add_sync_action :new, self, scope: scope, default_scope: sync_default_scope
         end
@@ -26,7 +26,7 @@ module Sync
       add_sync_action :destroy, self, default_scope: sync_default_scope
       
       sync_scope_definitions.each do |definition|
-        scope = Sync::Scope.new_from_model(definition, self)
+        scope = RenderSync::Scope.new_from_model(definition, self)
         if scope.valid?
           add_sync_action :destroy, self, 
             scope: scope, 
