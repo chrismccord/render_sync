@@ -2,7 +2,7 @@
 require "bundler/setup"
 require "yaml"
 require "faye"
-require "sync"
+require "render_sync"
 
 Faye::WebSocket.load_adapter 'thin'
 
