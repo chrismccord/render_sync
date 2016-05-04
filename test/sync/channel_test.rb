@@ -1,11 +1,11 @@
 require_relative '../test_helper'
 
-describe Sync::Channel do
+describe RenderSync::Channel do
   include TestHelper
 
   describe '#signature' do
     before do
-      @channel = Sync::Channel.new("testing")
+      @channel = RenderSync::Channel.new("testing")
     end
 
     it "Creates uniqe HMAC signature" do

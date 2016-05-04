@@ -3,30 +3,30 @@ require 'rails/all'
 require_relative 'abstract_controller'
 require_relative '../models/user'
 
-describe Sync::Partial do
+describe RenderSync::Partial do
   include TestHelper
 
   before do
     @context = ActionController::Base.new
-    @partial = Sync::Partial.new("show", User.new, nil, @context)
+    @partial = RenderSync::Partial.new("show", User.new, nil, @context)
   end
 
   describe '#self.all' do
     it 'returns an array of all Partials for given model' do
-      assert_equal 1, Sync::Partial.all(User.new, @context).size
-      assert_equal Sync::Partial, Sync::Partial.all(User.new, @context)[0].class
+      assert_equal 1, RenderSync::Partial.all(User.new, @context).size
+      assert_equal RenderSync::Partial, RenderSync::Partial.all(User.new, @context)[0].class
     end
   end
 
   describe '#self.find' do
     it 'finds partial given resource and partial name' do
       Dir.stubs(:[]).returns("_show.html.erb")
-      assert_equal Sync::Partial, Sync::Partial.find(User.new, 'show', nil).class
+      assert_equal RenderSync::Partial, RenderSync::Partial.find(User.new, 'show', nil).class
     end
 
     it 'returns nil if partial does not exist' do
       Dir.stubs(:[]).returns []
-      refute Sync::Partial.find(User.new, 'not_exist', nil)
+      refute RenderSync::Partial.find(User.new, 'not_exist', nil)
     end
   end
 
@@ -57,11 +57,11 @@ describe Sync::Partial do
 
   describe '#message' do
     it 'returns a Message instance for the partial for the update action' do
-      assert_equal Sync.client.class::Message, @partial.message(:update).class
+      assert_equal RenderSync.client.class::Message, @partial.message(:update).class
     end
 
      it 'returns a Message instance for the partial for the destroy action' do
-      assert_equal Sync.client.class::Message, @partial.message(:destroy).class
+      assert_equal RenderSync.client.class::Message, @partial.message(:destroy).class
     end
   end
 
@@ -100,7 +100,7 @@ describe Sync::Partial do
 
   describe 'creator_for_scope' do
     it 'returns a new PartialCreator for given scope' do
-      assert_equal Sync::PartialCreator, @partial.creator_for_scope(nil).class
+      assert_equal RenderSync::PartialCreator, @partial.creator_for_scope(nil).class
       assert @partial, @partial.creator_for_scope(nil).partial
     end
   end

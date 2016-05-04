@@ -1,10 +1,10 @@
 require_relative '../test_helper'
 
-describe Sync::FayeExtension do
+describe RenderSync::FayeExtension do
   include TestHelper
 
   before do
-    @server = Sync::FayeExtension.new
+    @server = RenderSync::FayeExtension.new
     @message = {
       "channel" => "/channel",
       "message" => "HTML",

@@ -17,7 +17,7 @@ require File.expand_path("../dummy/config/environment.rb",  __FILE__)
 Bundler.require(:default)
 
 def setup_database
-  ActiveRecord::Base.send :extend, Sync::Model::ClassMethods
+  ActiveRecord::Base.send :extend, RenderSync::Model::ClassMethods
 
   ActiveRecord::Base.connection.execute("DROP TABLE IF EXISTS todos")
   ActiveRecord::Base.connection.execute("CREATE TABLE todos (id INTEGER PRIMARY KEY, name TEXT, complete BOOLEAN, user_id INTEGER)")
@@ -35,34 +35,32 @@ end
 module TestHelper
 
   def setup
-    Sync.load_config(
+    RenderSync.load_config(
       File.expand_path("../fixtures/sync_faye.yml", __FILE__),
       "test"
     )
-    Sync.logger.level = ENV['LOGLEVEL'].present? ? ENV['LOGLEVEL'].to_i : 1
+    RenderSync.logger.level = ENV['LOGLEVEL'].present? ? ENV['LOGLEVEL'].to_i : 1
   end
 end
 
 module TestHelperFaye
 
   def setup
-    Sync.load_config(
+    RenderSync.load_config(
       File.expand_path("../fixtures/sync_faye.yml", __FILE__),
       "test"
     )
-    Sync.logger.level = ENV['LOGLEVEL'].present? ? ENV['LOGLEVEL'].to_i : 1
+    RenderSync.logger.level = ENV['LOGLEVEL'].present? ? ENV['LOGLEVEL'].to_i : 1
   end
 end
 
 module TestHelperPusher
 
   def setup
-    Sync.load_config(
+    RenderSync.load_config(
       File.expand_path("../fixtures/sync_pusher.yml", __FILE__),
       "test"
     )
-    Sync.logger.level = ENV['LOGLEVEL'].present? ? ENV['LOGLEVEL'].to_i : 1
+    RenderSync.logger.level = ENV['LOGLEVEL'].present? ? ENV['LOGLEVEL'].to_i : 1
   end
 end
-
-
