@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = "render_sync"
-  s.version     = "0.4.0"
+  s.version     = "0.5.0"
   s.author      = "Chris McCord"
   s.email       = "chris@chrismccord.com"
   s.homepage    = "http://github.com/chrismccord/render_sync"
