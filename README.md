@@ -70,7 +70,7 @@ gem 'render_sync'
 
 ```bash
 $ bundle
-$ rails g sync:install
+$ rails g render_sync:install
 ```
 
 #### 2) Require sync in your asset javascript manifest `app/assets/javascripts/application.js`:
